@@ -65,19 +65,18 @@ const Toast = ({
         {type === 'warning' && <RiAlertFill className={`${size === 'md' ? 'w-5 h-5' : 'w-4 h-4'} text-text-warning-secondary`} aria-hidden="true" />}
         {type === 'info' && <RiInformation2Fill className={`${size === 'md' ? 'w-5 h-5' : 'w-4 h-4'} text-text-accent`} aria-hidden="true" />}
       </div>
-      <div className={`flex py-1 ${size === 'md' ? 'px-1' : 'px-0.5'} flex-col items-start gap-1 flex-grow z-10`}>
-        <div className='flex items-center gap-1'>
-          <div className='text-text-primary system-sm-semibold'>{message}</div>
-          {customComponent}
-        </div>
+      <div className={`flex py-1 ${size === 'md' ? 'px-1' : 'px-0.5'} flex-col items-start gap-1 grow`}>
+        <div className='text-text-primary system-sm-semibold'>{message}</div>
         {children && <div className='text-text-secondary system-xs-regular'>
           {children}
         </div>
         }
       </div>
-      <ActionButton onClick={close}>
-        <RiCloseLine className='w-4 h-4 flex-shrink-0 text-text-tertiary' />
-      </ActionButton>
+      {close
+        && (<ActionButton className='z-[1000]' onClick={close}>
+          <RiCloseLine className='w-4 h-4 shrink-0 text-text-tertiary' />
+        </ActionButton>)
+      }
     </div>
   </div>
 }

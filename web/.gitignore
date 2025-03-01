@@ -197,3 +197,17 @@ node_modules
 /.next
 package-lock.json
 next-env.d.ts
+# yarn
+.pnp.cjs
+.pnp.loader.mjs
+.yarn/
+
+.favorites.json
+
+# storybook
+/storybook-static
+*storybook.log
+
+# mise
+mise.toml
+

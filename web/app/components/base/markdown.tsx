@@ -9,8 +9,7 @@ import RehypeRaw from 'rehype-raw'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import { atelierHeathLight } from 'react-syntax-highlighter/dist/esm/styles/hljs'
 import { Component, memo, useMemo, useRef, useState } from 'react'
-import type { CodeComponent } from 'react-markdown/lib/ast-to-react'
-import { flow } from 'lodash/fp'
+import { flow } from 'lodash-es'
 import cn from '@/utils/classnames'
 import CopyBtn from '@/app/components/base/copy-btn'
 import SVGBtn from '@/app/components/base/svg'
@@ -68,14 +67,9 @@ const preprocessLaTeX = (content: string) => {
 }
 
 const preprocessThinkTag = (content: string) => {
-  if (!content.trim().startsWith('<think>\n'))
-    return content
-
   return flow([
-    (str: string) => str.replace('<think>\n', '<details open><summary class="text-gray-500 font-bold">Thinking</summary><div class="text-gray-500 p-3 ml-2 bg-gray-50 border-l border-gray-300">\n'),
-    (str: string) => str.includes('\n</think>')
-      ? str.replace('\n</think>', '\n</div></details>')
-      : `${str}\n</div></details>`,
+    (str: string) => str.replace('<think>\n', '<details data-think=true>\n'),
+    (str: string) => str.replace('\n</think>', '\n[ENDTHINKFLAG]</details>'),
   ])(content)
 }
 
@@ -105,7 +99,7 @@ export function PreCode(props: { children: any }) {
 // visit https://reactjs.org/docs/error-decoder.html?invariant=185 for the full message
 // or use the non-minified dev environment for full errors and additional helpful warnings.
 
-const CodeBlock: CodeComponent = memo(({ inline, className, children, ...props }) => {
+const CodeBlock: any = memo(({ inline, className, children, ...props }) => {
   const [isSVG, setIsSVG] = useState(true)
   const match = /language-(\w+)/.exec(className || '')
   const language = match?.[1]
@@ -187,7 +181,7 @@ const CodeBlock: CodeComponent = memo(({ inline, className, children, ...props }
 })
 CodeBlock.displayName = 'CodeBlock'
 
-const VideoBlock: CodeComponent = memo(({ node }) => {
+const VideoBlock: any = memo(({ node }) => {
   const srcs = node.children.filter(child => 'properties' in child).map(child => (child as any).properties.src)
   if (srcs.length === 0)
     return null
@@ -195,7 +189,7 @@ const VideoBlock: CodeComponent = memo(({ node }) => {
 })
 VideoBlock.displayName = 'VideoBlock'
 
-const AudioBlock: CodeComponent = memo(({ node }) => {
+const AudioBlock: any = memo(({ node }) => {
   const srcs = node.children.filter(child => 'properties' in child).map(child => (child as any).properties.src)
   if (srcs.length === 0)
     return null
@@ -216,7 +210,9 @@ const Paragraph = (paragraph: any) => {
     return (
       <>
         <ImageGallery srcs={[children_node[0].properties.src]} />
-        <p>{paragraph.children.slice(1)}</p>
+        {
+          Array.isArray(paragraph.children) ? <p>{paragraph.children.slice(1)}</p> : null
+        }
       </>
     )
   }
@@ -263,6 +259,11 @@ export function Markdown(props: { content: string; className?: string }) {
                 if (node.type === 'element' && node.properties?.ref)
                   delete node.properties.ref
 
+                if (node.type === 'element' && !/^[a-z][a-z0-9]*$/i.test(node.tagName)) {
+                  node.type = 'text'
+                  node.value = `<${node.tagName}`
+                }
+
                 if (node.children)
                   node.children.forEach(iterate)
               }
@@ -270,7 +271,7 @@ export function Markdown(props: { content: string; className?: string }) {
             }
           },
         ]}
-        disallowedElements={['iframe', 'head', 'html', 'meta', 'link', 'style', 'body']}
+        disallowedElements={['iframe', 'head', 'html', 'meta', 'link', 'style', 'body', 'input']}
         components={{
           code: CodeBlock,
           img: Img,
@@ -282,7 +283,6 @@ export function Markdown(props: { content: string; className?: string }) {
           form: MarkdownForm,
           script: ScriptBlock,
         }}
-        linkTarget='_blank'
       >
         {/* Markdown detect has problem. */}
         {latexContent}
@@ -307,11 +307,11 @@ export default class ErrorBoundary extends Component {
   }
 
   render() {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // eslint-disable-next-line ts/ban-ts-comment
     // @ts-expect-error
     if (this.state.hasError)
       return <div>Oops! An error occurred. This could be due to an ECharts runtime error or invalid SVG content. <br />(see the browser console for more information)</div>
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // eslint-disable-next-line ts/ban-ts-comment
     // @ts-expect-error
     return this.props.children
   }
