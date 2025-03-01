@@ -119,7 +119,7 @@ export const ProviderContextProvider = ({
     if (localStorage.getItem('anthropic_quota_notice') === 'true')
       return
 
-    if (dayjs().isAfter(dayjs('2025-03-11')))
+    if (dayjs().isAfter(dayjs('2025-03-10')))
       return
 
     if (providersData?.data && providersData.data.length > 0) {
@@ -130,7 +130,7 @@ export const ProviderContextProvider = ({
           Toast.notify({
             type: 'info',
             message: t('common.provider.anthropicHosted.trialQuotaTip'),
-            duration: 60000,
+            duration: 6000,
             onClose: () => {
               localStorage.setItem('anthropic_quota_notice', 'true')
             },

@@ -22,6 +22,8 @@ export type IAppNavItemProps = {
   togglePin: () => void
   uninstallable: boolean
   onDelete: (id: string) => void
+  lastUsedTime?: string
+  className?: string
 }
 
 export default function AppNavItem({
@@ -37,6 +39,8 @@ export default function AppNavItem({
   togglePin,
   uninstallable,
   onDelete,
+  lastUsedTime,
+  className,
 }: IAppNavItemProps) {
   const router = useRouter()
   const url = `/explore/installed/${id}`
@@ -48,8 +52,9 @@ export default function AppNavItem({
       key={id}
       className={cn(
         s.item,
-        isSelected ? s.active : 'hover:bg-gray-200',
+        isSelected ? s.active : '',
         'flex h-8 items-center justify-between mobile:justify-center px-2 mobile:px-1 rounded-lg text-sm font-normal',
+        className
       )}
       onClick={() => {
         router.push(url) // use Link causes popup item always trigger jump. Can not be solved by e.stopPropagation().
@@ -60,7 +65,18 @@ export default function AppNavItem({
         <>
           <div className='flex items-center space-x-2 w-0 grow'>
             <AppIcon size='tiny' iconType={icon_type} icon={icon} background={icon_background} imageUrl={icon_url} />
-            <div className='overflow-hidden text-ellipsis whitespace-nowrap' title={name}>{name}</div>
+            <div className={cn('overflow-hidden text-ellipsis whitespace-nowrap', s.itemContent)} title={name}>
+              <div className="flex-1 flex items-center justify-between min-w-0 pr-2">
+                <div className={s.nameWrapper}>
+                  <span className="truncate text-sm">{name}</span>
+                </div>
+                {lastUsedTime && (
+                  <span className="ml-2 text-xs shrink-0 text-gray-400">
+                    {lastUsedTime}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
           <div className='shrink-0 h-6' onClick={e => e.stopPropagation()}>
             <ItemOperation

@@ -92,6 +92,9 @@ class App(db.Model):  # type: ignore[name-defined]
     updated_by = db.Column(StringUUID, nullable=True)
     updated_at = db.Column(db.DateTime, nullable=False, server_default=func.current_timestamp())
     use_icon_as_answer_icon = db.Column(db.Boolean, nullable=False, server_default=db.text("false"))
+    # 发布的apps，有发布路径（在哪个文件夹下），以及发布状态
+    publish_path = db.Column(db.Text, nullable=True)
+    publish_status = db.Column(db.String(255), nullable=False, server_default=db.text("'normal'::character varying"))
 
     @property
     def desc_or_prompt(self):

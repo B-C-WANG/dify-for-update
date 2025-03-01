@@ -1,4 +1,8 @@
 import logging
+try:
+    from line_profiler import LineProfiler
+except ImportError:
+    LineProfiler = None
 
 from flask_restful import reqparse  # type: ignore
 from werkzeug.exceptions import InternalServerError, NotFound
@@ -30,6 +34,29 @@ from libs.helper import uuid_value
 from models.model import AppMode
 from services.app_generate_service import AppGenerateService
 from services.errors.llm import InvokeRateLimitError
+
+
+def profile_function(func):
+    def wrapper(*args, **kwargs):
+        if LineProfiler is None: # 如果 LineProfiler 不可用，则直接返回原始函数
+            return func(*args, **kwargs)
+        
+        profiler = LineProfiler()
+        profiler.add_function(AppGenerateService.generate)  # 添加要分析的子函数
+        profiler.add_function(helper.compact_generate_response)
+        
+        # 包装目标函数
+        wrapper_func = profiler(func)
+        result = wrapper_func(*args, **kwargs)
+        
+        # 将分析结果写入日志
+        import io
+        s = io.StringIO()
+        profiler.print_stats(stream=s)
+        logging.info(f'Profile results for {func.__name__}:\n{s.getvalue()}')
+        
+        return result
+    return wrapper
 
 
 # define completion api for user
@@ -89,6 +116,7 @@ class CompletionStopApi(WebApiResource):
 
 
 class ChatApi(WebApiResource):
+    @profile_function
     def post(self, app_model, end_user):
         app_mode = AppMode.value_of(app_model.mode)
         if app_mode not in {AppMode.CHAT, AppMode.AGENT_CHAT, AppMode.ADVANCED_CHAT}:

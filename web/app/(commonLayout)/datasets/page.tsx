@@ -1,7 +1,11 @@
 import Container from './Container'
+import DeveloperGuard from '@/app/components/common/DeveloperGuard'
 
 const AppList = async () => {
-  return <Container />
+  return( 
+    <DeveloperGuard>
+  <Container />
+  </DeveloperGuard>)
 }
 
 export const metadata = {

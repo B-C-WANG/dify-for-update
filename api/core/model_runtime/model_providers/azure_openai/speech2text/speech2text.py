@@ -1,5 +1,7 @@
 import copy
 from typing import IO, Optional
+import requests
+from requests.exceptions import RequestException
 
 from openai import AzureOpenAI
 
@@ -43,7 +45,7 @@ class AzureOpenAISpeech2TextModel(_CommonAzureOpenAI, Speech2TextModel):
         except Exception as ex:
             raise CredentialsValidateFailedError(str(ex))
 
-    def _speech2text_invoke(self, model: str, credentials: dict, file: IO[bytes]) -> str:
+    def _speech2text_invoke_old(self, model: str, credentials: dict, file: IO[bytes]) -> str:
         """
         Invoke speech2text model
 
@@ -61,6 +63,71 @@ class AzureOpenAISpeech2TextModel(_CommonAzureOpenAI, Speech2TextModel):
         response = client.audio.transcriptions.create(model=model, file=file)
 
         return response.text
+    
+    def _speech2text_invoke(self, model: str, credentials: dict, file: IO[bytes]) -> str:
+        """
+        
+        使用 Azure 语音转文本 API 调用语音识别服务，重写了原来的_speech2text_invoke，改成了自定义的方式
+        # ---------------- [CHAT-CUSTOM] -------------------
+
+
+        :param model: 模型名称
+        :param credentials: 模型凭证
+        :param file: 音频文件
+        :return: 音频文件的文本转写结果
+        """
+        # 获取认证信息
+        credentials_kwargs = self._to_credential_kwargs(credentials)
+        
+        # 构建 API 请求 URL
+        endpoint = credentials_kwargs['azure_endpoint'].rstrip('/')
+        api_version = "2024-11-15"
+        url = f"{endpoint}/speechtotext/transcriptions:transcribe?api-version={api_version}"
+        
+        # 准备请求头
+        headers = {
+            'Ocp-Apim-Subscription-Key': credentials_kwargs['api_key']
+        }
+        
+        try:
+            # 准备文件数据
+            files = {
+                'audio': ('audio_file', file, 'application/octet-stream')
+            }
+            
+            # 发送请求
+            response = requests.post(
+                url,
+                headers=headers,
+                files=files,
+                timeout=300  # 使用固定的超时时间，而不是从 credentials_kwargs 中获取
+            )
+            
+            # 检查响应状态
+            if response.status_code == 422:
+                raise ValueError("语音输入时间太短，请提供更长的语音内容") # 直接把错误信息给到前端
+            
+            response.raise_for_status()
+            
+            # 解析响应
+            result = response.json()
+            
+            # 返回合并后的文本结果
+            if 'combinedPhrases' in result and result['combinedPhrases']:
+                return ' '.join(phrase['text'] for phrase in result['combinedPhrases'])
+            elif 'phrases' in result and result['phrases']:
+                return ' '.join(phrase['text'] for phrase in result['phrases'])
+            else:
+                raise ValueError("No transcription result found in response")
+            
+        except RequestException as e:
+            if "422" in str(e):
+                raise ValueError("语音输入时间太短，请提供更长的语音内容")# 直接把错误信息给到前端
+            raise Exception(f"Failed to transcribe audio: {str(e)}")
+        except (KeyError, ValueError) as e:
+            raise Exception(f"Failed to parse transcription response: {str(e)}")
+        except Exception as e:
+            raise Exception(f"Unexpected error during transcription: {str(e)}")
 
     def get_customizable_model_schema(self, model: str, credentials: dict) -> Optional[AIModelEntity]:
         ai_model_entity = self._get_ai_model_entity(credentials["base_model_name"], model)

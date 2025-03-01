@@ -351,6 +351,8 @@ export type App = {
   /** api site url */
   api_base_url: string
   tags: Tag[]
+  publish_status: string
+  publish_path: string
 }
 
 export type AppSSO = {
@@ -439,4 +441,12 @@ export type RetrievalConfig = {
       keyword_weight: number
     }
   }
+}
+
+export interface Account {
+  id: string
+  name: string
+  email: string
+  avatar?: string
+  role: 'normal' | 'developer'
 }

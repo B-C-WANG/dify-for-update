@@ -1,3 +1,5 @@
+import config from '@/app/custom-content/config'
+
 const translation = {
   custom: 'カスタマイズ',
   upgradeTip: {
@@ -6,7 +8,7 @@ const translation = {
   },
   webapp: {
     title: 'WebAppブランドのカスタマイズ',
-    removeBrand: 'Powered by Difyを削除',
+    removeBrand: `Powered by ${config.title}を削除`,
     changeLogo: 'Powered byブランド画像を変更',
     changeLogoTip: '最小サイズ40x40pxのSVGまたはPNG形式',
   },

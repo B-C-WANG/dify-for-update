@@ -2,7 +2,7 @@ import logging
 import mimetypes
 from collections.abc import Mapping, Sequence
 from typing import Any, Optional
-
+import json
 from configs import dify_config
 from core.file import File, FileTransferMethod
 from core.tools.tool_file_manager import ToolFileManager
@@ -69,8 +69,25 @@ class HttpRequestNode(BaseNode[HttpRequestNodeData]):
                 max_retries=0,
             )
             process_data["request"] = http_executor.to_log()
-
+            '''
+            如果url包含<func:，会走function lib处理，在这个过程中会逐渐透传出来所有字段，豁免一些逻辑处理
+            function lib的函数一般返回dict结果，通常就直接给json str就行
+            如果是file，可以根据dict的某些字段来判断，从而进行差异化处理
+            '''
             response = http_executor.invoke()
+            if "<func:" in http_executor.url:
+                return NodeRunResult(
+                    status=WorkflowNodeExecutionStatus.SUCCEEDED,
+                    outputs={
+                            "status_code": "200",
+                            "body": json.dumps(response),
+                            "headers": {},
+                            "files": [],
+                        },
+                    process_data={
+                        "request": http_executor.to_log(),
+                    },
+            )
             files = self.extract_files(url=http_executor.url, response=response)
             if not response.response.is_success and (self.should_continue_on_error or self.should_retry):
                 return NodeRunResult(

@@ -114,6 +114,32 @@ const config = {
         '20': '20',
         'mask-top2bottom-gray-50-to-transparent': 'var(--mask-top2bottom-gray-50-to-transparent)',
       },
+      keyframes: {
+        'toast-in': {
+          '0%': { 
+            transform: 'translate(-50%, -30%) scale(0.95)', 
+            opacity: '0' 
+          },
+          '100%': { 
+            transform: 'translate(-50%, -50%) scale(1)', 
+            opacity: '1' 
+          },
+        },
+        'highlight-pulse': {
+          '0%, 100%': {
+            boxShadow: '0 0 0 0 rgba(124, 58, 237, 0)',
+            borderColor: 'rgba(124, 58, 237, 0.1)'
+          },
+          '50%': {
+            boxShadow: '0 0 0 4px rgba(124, 58, 237, 0.1)',
+            borderColor: 'rgba(124, 58, 237, 0.3)'
+          }
+        }
+      },
+      animation: {
+        'toast-in': 'toast-in 0.2s ease-out',
+        'highlight-pulse': 'highlight-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+      },
     },
   },
   plugins: [

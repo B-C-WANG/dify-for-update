@@ -38,7 +38,7 @@ const translation = {
       description: '开始生成内容，您可以在这里找到保存的结果。',
       startCreateContent: '开始生成内容',
     },
-    title: 'AI 智能书写',
+    title: 'AI 工具',
     queryTitle: '查询内容',
     completionResult: '生成结果',
     queryPlaceholder: '请输入文本内容',

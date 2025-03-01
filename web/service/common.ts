@@ -348,3 +348,6 @@ export const verifyDeleteAccountCode = (body: { code: string;token: string }) =>
 
 export const submitDeleteAccountFeedback = (body: { feedback: string;email: string }) =>
   post<CommonResponse>('/account/delete/feedback', { body })
+
+export const updateWorkspaceName = (name: string) =>
+  post<CommonResponse & { tenant: any }>('/workspaces/name', { body: { name } })

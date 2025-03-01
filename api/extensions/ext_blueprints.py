@@ -12,14 +12,15 @@ def init_app(app: DifyApp):
     from controllers.inner_api import bp as inner_api_bp
     from controllers.service_api import bp as service_api_bp
     from controllers.web import bp as web_bp
-
+    from controllers.workflow_nodes_api import bp as workflow_nodes_api_bp
+    print("Extension blueprints started")
     CORS(
         service_api_bp,
         allow_headers=["Content-Type", "Authorization", "X-App-Code"],
         methods=["GET", "PUT", "POST", "DELETE", "OPTIONS", "PATCH"],
     )
     app.register_blueprint(service_api_bp)
-
+    print("Extension blueprints service_api_bp")
     CORS(
         web_bp,
         resources={r"/*": {"origins": dify_config.WEB_API_CORS_ALLOW_ORIGINS}},
@@ -30,6 +31,7 @@ def init_app(app: DifyApp):
     )
 
     app.register_blueprint(web_bp)
+    print("Extension blueprints web_bp")
 
     CORS(
         console_app_bp,
@@ -41,8 +43,25 @@ def init_app(app: DifyApp):
     )
 
     app.register_blueprint(console_app_bp)
+    print("Extension blueprints console_app_bp")
 
     CORS(files_bp, allow_headers=["Content-Type"], methods=["GET", "PUT", "POST", "DELETE", "OPTIONS", "PATCH"])
     app.register_blueprint(files_bp)
+    print("Extension blueprints files_bp")
 
     app.register_blueprint(inner_api_bp)
+    print("Extension blueprints inner_api_bp")
+    
+    
+    CORS(
+        workflow_nodes_api_bp,
+    resources={r"/*": {"origins": ["http://localhost:3001", *dify_config.CONSOLE_CORS_ALLOW_ORIGINS]}},  # 添加前端域名
+        supports_credentials=True,
+        allow_headers=["Content-Type", "Authorization"],
+        methods=["GET", "PUT", "POST", "DELETE", "OPTIONS", "PATCH"],
+        expose_headers=["X-Version", "X-Env"],
+    )
+    app.register_blueprint(workflow_nodes_api_bp)
+    print("Extension blueprints workflow_nodes_api_bp")
+
+    print("....Blue print init finished....")

@@ -60,7 +60,8 @@ const Sidebar = () => {
   }, [showRename, handleRenameConversation, handleCancelRename])
 
   return (
-    <div className='shrink-0 h-full flex flex-col w-[240px] border-r border-r-gray-100'>
+    <div className='shrink-0 h-full mt-4 flex flex-col w-[288px] border-r border-r-gray-100'>
+      <div style={{ height: 'var(--chat-sidebar-top-height, 70px)' }} />
       {
         !isMobile && (
           <div className='shrink-0 flex p-4'>

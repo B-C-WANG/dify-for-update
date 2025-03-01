@@ -47,13 +47,14 @@ class ForgotPasswordSendEmailApi(Resource):
         token = None
         if account is None:
             if FeatureService.get_system_features().is_allow_register:
+                # 如果在初始阶段没有找到这个账户，会直接要求重置密码并注册
                 token = AccountService.send_reset_password_email(email=args["email"], language=language)
                 return {"result": "fail", "data": token, "code": "account_not_found"}
             else:
                 raise AccountNotFound()
         else:
             token = AccountService.send_reset_password_email(account=account, email=args["email"], language=language)
-
+         # 返回这个重置密码的token，下一次请求前端会带上
         return {"result": "success", "data": token}
 
 

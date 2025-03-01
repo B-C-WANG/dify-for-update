@@ -23,7 +23,7 @@ const ConfigPanel = () => {
   const site = appData?.site
 
   return (
-    <div className='flex flex-col max-h-[80%] w-full max-w-[720px]'>
+    <div className='flex flex-col max-h-[80%] w-full max-w-[960px]'>
       <div
         className={`
           grow rounded-xl overflow-y-auto

@@ -21,11 +21,11 @@ import AppTypeSelector from '@/app/components/app/type-selector'
 import type { CreateAppModalProps } from '@/app/components/explore/create-app-modal'
 import Loading from '@/app/components/base/loading'
 import { NEED_REFRESH_APP_LIST_KEY } from '@/config'
-import { useAppContext } from '@/context/app-context'
 import { getRedirection } from '@/utils/app-redirection'
 import Input from '@/app/components/base/input'
 import { DSLImportMode } from '@/models/app'
-
+import { useAppContext } from '@/context/app-context'
+import { isDeveloper } from '@/app/components/common/DeveloperGuard'
 type AppsProps = {
   pageType?: PageType
   onSuccess?: () => void
@@ -41,7 +41,7 @@ const Apps = ({
   onSuccess,
 }: AppsProps) => {
   const { t } = useTranslation()
-  const { isCurrentWorkspaceEditor } = useAppContext()
+  const { isCurrentWorkspaceEditor, userProfile } = useAppContext()
   const { push } = useRouter()
   const { hasEditPermission } = useContext(ExploreContext)
   const allCategoriesEn = t('explore.apps.allCategories', { lng: 'en' })
@@ -152,6 +152,68 @@ const Apps = ({
     }
   }
 
+  const isUserDeveloper = isDeveloper(userProfile)
+
+  const DeveloperGuideBox = () => {
+    const { t } = useTranslation()
+    return (
+      <div className="mx-12 py-1 px-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-sm border border-blue-100/60 mt-4 mb-3">
+        <div className="flex items-center justify-start text-[11px] tracking-tight">
+          <span className="text-blue-800 font-medium mr-1.5 shrink-0">
+            {t('explore.developer.guide.title', '建议的开发流程：')}
+          </span>
+          <span className="text-blue-700/90 flex items-center flex-wrap">
+            <span className="inline-flex items-center">
+              <span className="inline-flex items-center justify-center bg-blue-100/80 rounded-full w-3.5 h-3.5 text-blue-700 font-medium text-[10px]">1</span>
+              <span className="mx-0.5">在探索页面寻找参考（可以直接添加后编辑）</span>
+              <span className="mx-0.5 text-blue-200">•</span>
+            </span>
+            <span className="inline-flex items-center">
+              <span className="inline-flex items-center justify-center bg-blue-100/80 rounded-full w-3.5 h-3.5 text-blue-700 font-medium text-[10px]">2</span>
+              <span className="mx-0.5">完善知识库</span>
+              <span className="mx-0.5 text-blue-200">•</span>
+            </span>
+            <span className="inline-flex items-center">
+              <span className="inline-flex items-center justify-center bg-blue-100/80 rounded-full w-3.5 h-3.5 text-blue-700 font-medium text-[10px]">3</span>
+              <span className="mx-0.5">引用工具和知识库完成agent设计</span>
+              <span className="mx-0.5 text-blue-200">•</span>
+            </span>
+            <span className="inline-flex items-center">
+              <span className="inline-flex items-center justify-center bg-blue-100/80 rounded-full w-3.5 h-3.5 text-blue-700 font-medium text-[10px]">4</span>
+              <span className="mx-0.5">发布并填写路径</span>
+              <span className="mx-0.5 text-blue-200">•</span>
+            </span>
+            <span className="inline-flex items-center">
+              <span className="inline-flex items-center justify-center bg-blue-100/80 rounded-full w-3.5 h-3.5 text-blue-700 font-medium text-[10px]">5</span>
+              <span className="mx-0.5">用户订阅你的tenant</span>
+              <span className="mx-0.5 text-blue-200">•</span>
+            </span>
+            <span className="inline-flex items-center">
+              <span className="inline-flex items-center justify-center bg-blue-100/80 rounded-full w-3.5 h-3.5 text-blue-700 font-medium text-[10px]">6</span>
+              <span className="mx-0.5">用户使用并付费</span>
+            </span>
+          </span>
+        </div>
+      </div>
+    )
+  }
+
+  // 普通用户直接提示选择开发工具
+  if (!isUserDeveloper) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-center">
+          <div className="text-lg font-medium text-gray-900 mb-2">
+            {t('explore.nonDeveloper.title', '请打开左上角AI人力资源库选择你要使用的AI人力')}
+          </div>
+          <div className="text-sm text-gray-500">
+            {t('explore.nonDeveloper.subtitle', '或者订阅其他开发者的工具 (即将推出)')}
+          </div>
+        </div>
+      </div>
+    )
+  }
+  // 开发者会等待加载，然后显示默认的探索页面
   if (!categories || categories.length === 0) {
     return (
       <div className="flex h-full items-center">
@@ -159,20 +221,19 @@ const Apps = ({
       </div>
     )
   }
-
   return (
     <div className={cn(
       'flex flex-col',
-      pageType === PageType.EXPLORE ? 'h-full border-l border-gray-200' : 'h-[calc(100%-56px)]',
+      pageType === PageType.EXPLORE ? 'h-full border-l border-200' : 'h-[calc(100%-56px)]',
     )}>
+      {pageType === PageType.EXPLORE && isUserDeveloper && <DeveloperGuideBox />}
       {pageType === PageType.EXPLORE && (
-        <div className='shrink-0 pt-6 px-12'>
-          <div className={`mb-1 ${s.textGradient} text-xl font-semibold`}>{t('explore.apps.title')}</div>
-          <div className='text-gray-500 text-sm'>{t('explore.apps.description')}</div>
+        <div className='shrink-0 pt-2 px-12'>
+          <div className={`${s.textGradient} text-lg font-medium`}>{t('explore.apps.title')}</div>
         </div>
       )}
       <div className={cn(
-        'flex items-center justify-between mt-6',
+        'flex items-center justify-between mt-3',
         pageType === PageType.EXPLORE ? 'px-12' : 'px-8',
       )}>
         <>

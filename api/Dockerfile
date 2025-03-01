@@ -1,7 +1,8 @@
 # base image
 FROM python:3.12-slim-bookworm AS base
 
-WORKDIR /app/api
+# 注意不在api文件夹里面了，所以直接就是/app
+WORKDIR /app/ 
 
 # Install Poetry
 ENV POETRY_VERSION=2.0.1
@@ -10,6 +11,9 @@ ENV POETRY_VERSION=2.0.1
 # RUN pip install --no-cache-dir poetry==${POETRY_VERSION} -i https://mirrors.aliyun.com/pypi/simple/
 
 RUN pip install --no-cache-dir poetry==${POETRY_VERSION}
+# 安装metagpt，但是不要影响dify的依赖库
+# RUN pip install 'metagpt[all]==0.8.1' --no-dependencies 
+
 
 # Configure Poetry
 ENV POETRY_CACHE_DIR=/tmp/poetry_cache
@@ -46,7 +50,7 @@ EXPOSE 5001
 # set timezone
 ENV TZ=UTC
 
-WORKDIR /app/api
+WORKDIR /app/
 
 RUN \
     apt-get update \
@@ -64,21 +68,38 @@ RUN \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy Python environment and packages
-ENV VIRTUAL_ENV=/app/api/.venv
+ENV VIRTUAL_ENV=/app/.venv
 COPY --from=packages ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
 
 # Download nltk data
-RUN python -c "import nltk; nltk.download('punkt'); nltk.download('averaged_perceptron_tagger')"
+
+# 
+RUN echo "[WARNING] nltk未下载，如果有需要，在dockerfile中反注释"
+#RUN python -c "import nltk; nltk.download('punkt'); nltk.download('averaged_perceptron_tagger')"
 
 # Copy source code
-COPY . /app/api/
+COPY . /app/
 
 # Copy entrypoint
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
+
 ARG COMMIT_SHA
 ENV COMMIT_SHA=${COMMIT_SHA}
 
+RUN ls -al
+
+# 由于entrypoint.sh总是执行失败，因此这里直接执行运行的命令
+# 原始命令：
 ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]
+
+
+# CMD ["gunicorn", "--bind", "localhost:5001", "--workers", "1", "--worker-class", "gevent", "--worker-connections", "10", "--timeout", "200", "app:app"]
+
+# 如果需要测试bug，请用下面的，在build阶段尝试运行，找到问题（如果在deploy后，会一直重启）
+# RUN ["/bin/bash", "/entrypoint.sh"]
+
+# 更精简的测试
+# CMD ["python", "app.py"]

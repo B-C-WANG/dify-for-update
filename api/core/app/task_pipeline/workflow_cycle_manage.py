@@ -60,6 +60,60 @@ from models.workflow import (
 from .exc import WorkflowRunNotFoundError
 
 
+def filter_formdata_files(data: Any) -> Any:
+    """
+    过滤掉 formdata 中的文件内容，并展示处理前后的数据大小
+    
+    :param data: 输入数据
+    :return: 过滤后的数据
+    """
+    import sys
+    import json
+    
+    # 设置大小阈值为10KB
+    SIZE_THRESHOLD = 10 * 1024
+    
+    def get_size(obj: Any) -> int:
+        """获取对象大小"""
+        return sys.getsizeof(str(obj))
+    
+    if isinstance(data, dict):
+        original_size = get_size(data)
+        filtered_data = {}
+        
+        for key, value in data.items():
+            if isinstance(value, str):
+                # 检查字符串长度是否超过阈值
+                if len(value) > SIZE_THRESHOLD:
+                    filtered_data[key] = "<HIDDEN>"
+                    continue
+                    
+                try:
+                    # 尝试解析 JSON 字符串
+                    json_data = json.loads(value)
+                    if isinstance(json_data, dict) and "request" in json_data:
+                        # 如果包含文件内容的请求,直接替换为<HIDDEN>
+                        if "multipart/form-data" in json_data["request"] or len(json_data["request"]) > SIZE_THRESHOLD:
+                            json_data["request"] = "<HIDDEN>"
+                        filtered_data[key] = json.dumps(json_data)
+                    else:
+                        filtered_data[key] = filter_formdata_files(json_data)
+                except json.JSONDecodeError:
+                    filtered_data[key] = value
+            else:
+                filtered_data[key] = filter_formdata_files(value)
+        
+        filtered_size = get_size(filtered_data)
+        # print(f"过滤前数据大小: {original_size} 字节")
+        # print(f"过滤后数据大小: {filtered_size} 字节") 
+        # print(f"节省空间: {original_size - filtered_size} 字节")
+        
+        return filtered_data
+    elif isinstance(data, list):
+        return [filter_formdata_files(item) for item in data]
+    else:
+        return data
+
 class WorkflowCycleManage:
     def __init__(
         self,
@@ -311,6 +365,7 @@ class WorkflowCycleManage:
         self._workflow_node_executions[event.node_execution_id] = workflow_node_execution
         return workflow_node_execution
 
+
     def _handle_workflow_node_execution_success(
         self, *, session: Session, event: QueueNodeSucceededEvent
     ) -> WorkflowNodeExecution:
@@ -319,6 +374,7 @@ class WorkflowCycleManage:
         )
         inputs = WorkflowEntry.handle_special_values(event.inputs)
         process_data = WorkflowEntry.handle_special_values(event.process_data)
+        
         outputs = WorkflowEntry.handle_special_values(event.outputs)
         execution_metadata = (
             json.dumps(jsonable_encoder(event.execution_metadata)) if event.execution_metadata else None
@@ -326,11 +382,11 @@ class WorkflowCycleManage:
         finished_at = datetime.now(UTC).replace(tzinfo=None)
         elapsed_time = (finished_at - event.start_at).total_seconds()
 
-        process_data = WorkflowEntry.handle_special_values(event.process_data)
-
         workflow_node_execution.status = WorkflowNodeExecutionStatus.SUCCEEDED.value
         workflow_node_execution.inputs = json.dumps(inputs) if inputs else None
-        workflow_node_execution.process_data = json.dumps(process_data) if process_data else None
+        # 过滤 process_data 中的文件内容
+        filtered_process_data = filter_formdata_files(process_data)
+        workflow_node_execution.process_data = json.dumps(filtered_process_data) if filtered_process_data else None
         workflow_node_execution.outputs = json.dumps(outputs) if outputs else None
         workflow_node_execution.execution_metadata = execution_metadata
         workflow_node_execution.finished_at = finished_at
@@ -362,7 +418,7 @@ class WorkflowCycleManage:
         execution_metadata = (
             json.dumps(jsonable_encoder(event.execution_metadata)) if event.execution_metadata else None
         )
-        process_data = WorkflowEntry.handle_special_values(event.process_data)
+
         workflow_node_execution.status = (
             WorkflowNodeExecutionStatus.FAILED.value
             if not isinstance(event, QueueNodeExceptionEvent)
@@ -370,7 +426,9 @@ class WorkflowCycleManage:
         )
         workflow_node_execution.error = event.error
         workflow_node_execution.inputs = json.dumps(inputs) if inputs else None
-        workflow_node_execution.process_data = json.dumps(process_data) if process_data else None
+        # 过滤 process_data 中的文件内容
+        filtered_process_data = filter_formdata_files(process_data)
+        workflow_node_execution.process_data = json.dumps(filtered_process_data) if filtered_process_data else None
         workflow_node_execution.outputs = json.dumps(outputs) if outputs else None
         workflow_node_execution.finished_at = finished_at
         workflow_node_execution.elapsed_time = elapsed_time

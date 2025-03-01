@@ -290,7 +290,7 @@ const translation = {
       usedUp: '试用额度已用完，请在下方添加自己的模型供应商',
       useYourModel: '当前正在使用你自己的模型供应商。',
       close: '关闭',
-      trialQuotaTip: '您的 Anthropic 体验额度将于 2025/03/11 过期，过期后将无法使用，请尽快体验。',
+      trialQuotaTip: '您的 Anthropic 体验额度将于 2025/03/10 过期，过期后将无法使用，请尽快体验。',
     },
     anthropic: {
       using: '嵌入能力正在使用',
@@ -531,8 +531,6 @@ const translation = {
       hitScore: '召回得分：',
     },
     inputPlaceholder: '和机器人聊天',
-    thinking: '深度思考中...',
-    thought: '已深度思考',
   },
   promptEditor: {
     placeholder: '在这里写你的提示词，输入\'{\' 插入变量、输入\'/\' 插入提示内容块',
@@ -544,7 +542,7 @@ const translation = {
       modal: {
         title: '有 {{num}} 个知识库在上下文中',
         add: '添加上下文',
-        footer: '您可以在下面的“上下文”部分中管理上下文。',
+        footer: '您可以在下面的"上下文"部分中管理上下文。',
       },
     },
     history: {
@@ -622,6 +620,11 @@ const translation = {
   },
   pagination: {
     perPage: '每页显示',
+  },
+  role: {
+    normal: '普通用户',
+    developer: '开发者',
+    upgradeTip: '联系我们以获得更多用户权限'
   },
 }
 

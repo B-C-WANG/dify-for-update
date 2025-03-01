@@ -43,7 +43,7 @@ export default function CheckCode() {
       if (ret.result === 'success') {
         localStorage.setItem('console_token', ret.data.access_token)
         localStorage.setItem('refresh_token', ret.data.refresh_token)
-        router.replace(invite_token ? `/signin/invite-settings?${searchParams.toString()}` : '/apps')
+        router.replace(invite_token ? `/signin/invite-settings?${searchParams.toString()}` : '/explore/apps')
       }
     }
     catch (error) { console.error(error) }

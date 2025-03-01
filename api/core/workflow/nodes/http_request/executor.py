@@ -4,7 +4,7 @@ from copy import deepcopy
 from random import randint
 from typing import Any, Literal
 from urllib.parse import urlencode, urlparse
-
+import controllers.function_libs as function_libs
 import httpx
 
 from configs import dify_config
@@ -111,7 +111,8 @@ class Executor:
         # check if url is a valid URL
         if not self.url:
             raise InvalidURLError("url is required")
-        if not self.url.startswith(("http://", "https://")):
+        
+        if not self.url.startswith(("http://", "https://")) or self.url.startswith("<func:"):
             raise InvalidURLError("url should start with http:// or https://")
 
     def _init_params(self):
@@ -282,6 +283,7 @@ class Executor:
         }:
             raise InvalidHttpMethodError(f"Invalid http method {self.method}")
 
+        # ----------<func    
         request_args = {
             "url": self.url,
             "data": self.data,
@@ -294,19 +296,35 @@ class Executor:
             "follow_redirects": True,
             "max_retries": self.max_retries,
         }
-        # request_args = {k: v for k, v in request_args.items() if v is not None}
-        try:
-            response = getattr(ssrf_proxy, self.method.lower())(**request_args)
-        except (ssrf_proxy.MaxRetriesExceededError, httpx.RequestError) as e:
-            raise HttpRequestNodeError(str(e))
-        # FIXME: fix type ignore, this maybe httpx type issue
-        return response  # type: ignore
+        # 封装成function lib可以request的格式
+        # print(request_args)
+        request_like = function_libs.DictRequest(files=self.files, form=self.data)
+        
+        # hack逻辑，如果url是<func:xxxx>，则调用function_libs中的函数，而不是发起请求
+        if "<func:" in self.url:
+            try:
+                function_name = self.url.split("<func:")[1].split(">")[0]
+                function = function_libs.FUNCTION_LIBS.get(function_name)
+                if function:
+                    return function(request_like)
+            except Exception as e:
+                raise HttpRequestNodeError(str(e))
+        else:
+            # request_args = {k: v for k, v in request_args.items() if v is not None}
+            try:
+                response = getattr(ssrf_proxy, self.method.lower())(**request_args)
+            except (ssrf_proxy.MaxRetriesExceededError, httpx.RequestError) as e:
+                raise HttpRequestNodeError(str(e))
+            # FIXME: fix type ignore, this maybe httpx type issue
+            return response  # type: ignore
 
     def invoke(self) -> Response:
         # assemble headers
         headers = self._assembling_headers()
-        # do http request
+        # do http request，这里是function lib给出的dict结果
         response = self._do_http_request(headers)
+        if "<func:" in self.url:
+            return response
         # validate response
         return self._validate_and_parse_response(response)
 

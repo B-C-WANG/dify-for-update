@@ -22,7 +22,7 @@ import Header from '@/app/components/base/chat/embedded-chatbot/header'
 import ConfigPanel from '@/app/components/base/chat/embedded-chatbot/config-panel'
 import ChatWrapper from '@/app/components/base/chat/embedded-chatbot/chat-wrapper'
 import Tooltip from '@/app/components/base/tooltip'
-
+import config from '@/app/custom-content/config'
 const Chatbot = () => {
   const { t } = useTranslation()
   const {
@@ -49,7 +49,7 @@ const Chatbot = () => {
       if (customConfig)
         document.title = `${site.title}`
       else
-        document.title = `${site.title} - Powered by Dify`
+        document.title = `${site.title} - Powered by ${config.title}`
     }
   }, [site, customConfig, themeBuilder])
 

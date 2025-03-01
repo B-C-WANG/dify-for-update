@@ -19,7 +19,7 @@ import Loading from '@/app/components/base/loading'
 import useBreakpoints, { MediaType } from '@/hooks/use-breakpoints'
 import { checkOrSetAccessToken } from '@/app/components/share/utils'
 import AppUnavailable from '@/app/components/base/app-unavailable'
-
+import config from '@/app/custom-content/config'
 type ChatWithHistoryProps = {
   className?: string
 }
@@ -48,7 +48,7 @@ const ChatWithHistory: FC<ChatWithHistoryProps> = ({
       if (customConfig)
         document.title = `${site.title}`
       else
-        document.title = `${site.title} - Powered by Dify`
+        document.title = `${site.title} - Powered by ${config.title}`
     }
   }, [site, customConfig, themeBuilder])
 

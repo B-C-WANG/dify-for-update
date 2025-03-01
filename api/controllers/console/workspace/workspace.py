@@ -218,6 +218,32 @@ class WebappLogoWorkspaceApi(Resource):
         return {"id": upload_file.id}, 201
 
 
+class UpdateWorkspaceNameApi(Resource):
+    @setup_required
+    @login_required
+    @account_initialization_required
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("name", type=str, required=True, location="json")
+        args = parser.parse_args()
+
+        tenant = current_user.current_tenant
+        
+        # 添加名称验证
+        if not args["name"] or len(args["name"].strip()) == 0:
+            raise ValueError("工作空间名称不能为空")
+            
+        if len(args["name"]) > 50:  # 假设最大长度为50
+            raise ValueError("工作空间名称不能超过50个字符")
+        
+        # 更新租户名称
+        WorkspaceService.update_tenant_name(tenant.id, args["name"])
+        
+        # 获取更新后的租户信息并返回
+        updated_tenant = WorkspaceService.get_tenant_info(tenant)
+        return {"result": "success", "tenant": marshal(updated_tenant, tenant_fields)}
+
+
 api.add_resource(TenantListApi, "/workspaces")  # GET for getting all tenants
 api.add_resource(WorkspaceListApi, "/all-workspaces")  # GET for getting all tenants
 api.add_resource(TenantApi, "/workspaces/current", endpoint="workspaces_current")  # GET for getting current tenant info
@@ -225,3 +251,4 @@ api.add_resource(TenantApi, "/info", endpoint="info")  # Deprecated
 api.add_resource(SwitchWorkspaceApi, "/workspaces/switch")  # POST for switching tenant
 api.add_resource(CustomConfigWorkspaceApi, "/workspaces/custom-config")
 api.add_resource(WebappLogoWorkspaceApi, "/workspaces/custom-config/webapp-logo/upload")
+api.add_resource(UpdateWorkspaceNameApi, "/workspaces/name")

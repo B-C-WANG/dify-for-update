@@ -34,7 +34,7 @@ from models.workflow import (
 )
 from services.errors.app import WorkflowHashNotEqualError
 from services.workflow.workflow_converter import WorkflowConverter
-
+from core.app.task_pipeline.workflow_cycle_manage import filter_formdata_files
 
 class WorkflowService:
     """
@@ -327,7 +327,9 @@ class WorkflowService:
             outputs = WorkflowEntry.handle_special_values(node_run_result.outputs) if node_run_result.outputs else None
 
             workflow_node_execution.inputs = json.dumps(inputs)
-            workflow_node_execution.process_data = json.dumps(process_data)
+            # 过滤 process_data 中的文件内容
+            filtered_process_data = filter_formdata_files(process_data)
+            workflow_node_execution.process_data = json.dumps(filtered_process_data) if filtered_process_data else None
             workflow_node_execution.outputs = json.dumps(outputs)
             workflow_node_execution.execution_metadata = (
                 json.dumps(jsonable_encoder(node_run_result.metadata)) if node_run_result.metadata else None

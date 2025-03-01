@@ -17,10 +17,12 @@ installed_app_fields = {
     "id": fields.String,
     "app": fields.Nested(app_fields),
     "app_owner_tenant_id": fields.String,
+    "app_owner_tenant_name": fields.String,
     "is_pinned": fields.Boolean,
     "last_used_at": TimestampField,
     "editable": fields.Boolean,
     "uninstallable": fields.Boolean,
+    "publish_path": fields.String,
 }
 
 installed_app_list_fields = {"installed_apps": fields.List(fields.Nested(installed_app_fields))}

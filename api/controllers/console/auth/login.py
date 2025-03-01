@@ -47,6 +47,7 @@ class LoginApi(Resource):
         parser.add_argument("invite_token", type=str, required=False, default=None, location="json")
         parser.add_argument("language", type=str, required=False, default="en-US", location="json")
         args = parser.parse_args()
+        print("LoginInfo",args)
 
         if dify_config.BILLING_ENABLED and BillingService.is_email_in_freeze(args["email"]):
             raise AccountInFreezeError()
@@ -86,7 +87,10 @@ class LoginApi(Resource):
                 raise AccountNotFound()
         # SELF_HOSTED only have one workspace
         tenants = TenantService.get_join_tenants(account)
+        print("Got tenants, 用户第一次登录理应自动绑定tenant，如果没有，请删除账户重新创建", tenants)
+        print("EDITION",dify_config.EDITION)
         if len(tenants) == 0:
+            print("No tenants")
             return {
                 "result": "fail",
                 "data": "workspace not found, please contact system admin to invite you to join in a workspace",
@@ -94,7 +98,8 @@ class LoginApi(Resource):
 
         token_pair = AccountService.login(account=account, ip_address=extract_remote_ip(request))
         AccountService.reset_login_error_rate_limit(args["email"])
-        return {"result": "success", "data": token_pair.model_dump()}
+        res = {"result": "success", "data": token_pair.model_dump()}
+        return res
 
 
 class LogoutApi(Resource):

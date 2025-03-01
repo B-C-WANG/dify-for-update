@@ -4,6 +4,10 @@ import { NextResponse } from 'next/server'
 const NECESSARY_DOMAIN = '*.sentry.io http://localhost:* http://127.0.0.1:* https://analytics.google.com googletagmanager.com *.googletagmanager.com https://www.google-analytics.com https://api.github.com'
 
 export function middleware(request: NextRequest) {
+  if (request.nextUrl.pathname === '/') {
+    return NextResponse.redirect(new URL('/explore/apps', request.url))
+  }
+
   const isWhiteListEnabled = !!process.env.NEXT_PUBLIC_CSP_WHITELIST && process.env.NODE_ENV === 'production'
   if (!isWhiteListEnabled)
     return NextResponse.next()
@@ -56,6 +60,7 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    '/',
     /*
      * Match all request paths except for the ones starting with:
      * - api (API routes)

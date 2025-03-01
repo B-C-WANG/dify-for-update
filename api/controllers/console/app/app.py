@@ -6,6 +6,7 @@ from flask_restful import Resource, inputs, marshal, marshal_with, reqparse  # t
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from werkzeug.exceptions import BadRequest, Forbidden, abort
+from flask import request, jsonify
 
 from controllers.console import api
 from controllers.console.app.wraps import get_app_model
@@ -67,7 +68,10 @@ class AppListApi(Resource):
         if not app_pagination:
             return {"data": [], "total": 0, "page": 1, "limit": 20, "has_more": False}
 
-        return marshal(app_pagination, app_pagination_fields)
+        res = marshal(app_pagination, app_pagination_fields)
+        # print("res", res)
+        return res
+        
 
     @setup_required
     @login_required
@@ -332,6 +336,44 @@ class AppTraceApi(Resource):
         return {"result": "success"}
 
 
+class AppPublishApi(Resource):
+    @setup_required
+    @login_required
+    @account_initialization_required
+    @get_app_model
+    @marshal_with(app_detail_fields)  
+    def post(self, app_model):
+        # 发布应用，设置发布路径和发布状态
+        if not current_user.is_editor:
+            raise Forbidden()
+        
+        parser = reqparse.RequestParser()
+        parser.add_argument("publish_path", type=str, location="json")
+        parser.add_argument("publish_status", type=str, location="json")
+        args = parser.parse_args()
+        print("args", args)
+        publish_path = args.get('publish_path')
+        publish_status = args.get('publish_status')
+
+        # 检查两个参数是否同时为空
+        if not publish_path and not publish_status:
+            return jsonify({"error": "publish_path 和 publish_status 不能同时为空"}), 400
+
+        # 假设有一个函数 update_publish_info 用于更新数据库
+        update_fields = {}
+        if publish_path is not None:
+            update_fields['publish_path'] = publish_path
+        if publish_status is not None:
+            update_fields['publish_status'] = publish_status
+
+        # 调用更新函数
+        app_service = AppService()
+        app_model = app_service.update_publish_info(app_model, update_fields)  # 修正变量名
+        # print("app_model", app_model)
+
+        return app_model
+
+
 api.add_resource(AppListApi, "/apps")
 api.add_resource(AppApi, "/apps/<uuid:app_id>")
 api.add_resource(AppCopyApi, "/apps/<uuid:app_id>/copy")
@@ -341,3 +383,4 @@ api.add_resource(AppIconApi, "/apps/<uuid:app_id>/icon")
 api.add_resource(AppSiteStatus, "/apps/<uuid:app_id>/site-enable")
 api.add_resource(AppApiStatus, "/apps/<uuid:app_id>/api-enable")
 api.add_resource(AppTraceApi, "/apps/<uuid:app_id>/trace")
+api.add_resource(AppPublishApi, "/apps/<uuid:app_id>/publish")  

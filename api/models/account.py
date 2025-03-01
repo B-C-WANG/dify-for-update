@@ -37,6 +37,22 @@ class Account(UserMixin, db.Model):  # type: ignore[name-defined]
     initialized_at = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, nullable=False, server_default=func.current_timestamp())
     updated_at = db.Column(db.DateTime, nullable=False, server_default=func.current_timestamp())
+    role = db.Column(db.String(255), default="normal",server_default="normal", nullable=False)
+    '''
+    这里有两种role
+    1. account的role
+    如果是normal普通用户，只有使用权限，什么都不能改，可以订阅tenant来获得更多agent，tenant对他们来讲没用
+    2. tenant的role
+    只有acount是developer，tenant才有意义，可以修改管理agent
+    '''
+    
+    # 默认的这个id是官方账号对应的tenant id，不是account id ！
+    subscribed_tenant_id_list = db.Column(
+        db.ARRAY(StringUUID),
+        default=['4aaab84b-7012-4163-8de3-275e5d6de0ff'],
+        server_default="'{4aaab84b-7012-4163-8de3-275e5d6de0ff}'",  
+        nullable=False
+    )
 
     @property
     def is_password_set(self):
@@ -87,6 +103,10 @@ class Account(UserMixin, db.Model):  # type: ignore[name-defined]
     def current_role(self):
         return self._current_tenant.current_role
 
+    @property
+    def current_account_role(self):
+        return self.role
+
     def get_status(self) -> AccountStatus:
         status_str = self.status
         return AccountStatus(status_str)
@@ -104,23 +124,63 @@ class Account(UserMixin, db.Model):  # type: ignore[name-defined]
 
     @property
     def is_admin_or_owner(self):
-        return TenantAccountRole.is_privileged_role(self._current_tenant.current_role)
+        return TenantAccountRole.is_privileged_role(self._current_tenant.current_role) and self.role == "developer"
 
     @property
     def is_admin(self):
-        return TenantAccountRole.is_admin_role(self._current_tenant.current_role)
+        return TenantAccountRole.is_admin_role(self._current_tenant.current_role) and self.role == "developer"
 
     @property
     def is_editor(self):
-        return TenantAccountRole.is_editing_role(self._current_tenant.current_role)
+        return TenantAccountRole.is_editing_role(self._current_tenant.current_role) and self.role == "developer"
 
     @property
     def is_dataset_editor(self):
-        return TenantAccountRole.is_dataset_edit_role(self._current_tenant.current_role)
+        return TenantAccountRole.is_dataset_edit_role(self._current_tenant.current_role)and self.role == "developer"
 
     @property
     def is_dataset_operator(self):
-        return self._current_tenant.current_role == TenantAccountRole.DATASET_OPERATOR
+        return (self._current_tenant.current_role == TenantAccountRole.DATASET_OPERATOR) and self.role == "developer"
+
+    def get_permissions(self):
+        if self.is_admin:
+            return {
+                'workspace': True,
+                'workflow': True,
+                'tools': True,
+                'explore': True,
+                'market': True
+            }
+        else:
+            return {
+                'workspace': False,
+                'workflow': False,
+                'tools': False,
+                'explore': True,
+                'market': True
+            }
+
+    def to_dict(self):
+        _dict = {
+            'id': self.id,
+            'name': self.name,
+            'email': self.email,
+            'password': self.password,
+            'password_salt': self.password_salt,
+            'avatar': self.avatar,
+            'interface_language': self.interface_language,
+            'interface_theme': self.interface_theme,
+            'timezone': self.timezone,
+            'last_login_at': self.last_login_at,
+            'last_login_ip': self.last_login_ip,
+            'last_active_at': self.last_active_at,
+            'status': self.status,
+            'initialized_at': self.initialized_at,
+            'created_at': self.created_at,
+            'updated_at': self.updated_at,
+            'role': self.role,
+        }
+        return _dict
 
 
 class TenantStatus(enum.StrEnum):

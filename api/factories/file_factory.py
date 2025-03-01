@@ -118,8 +118,9 @@ def _build_from_local_file(
     transfer_method: FileTransferMethod,
 ) -> File:
     upload_file_id = mapping.get("upload_file_id")
+    print("upload_file_id:",upload_file_id,"tenant_id:",tenant_id,"transfer_method:",transfer_method)
     if not upload_file_id:
-        raise ValueError("Invalid upload file id")
+        raise ValueError("Invalid upload file id") 
     # check if upload_file_id is a valid uuid
     try:
         uuid.UUID(upload_file_id)
@@ -127,8 +128,9 @@ def _build_from_local_file(
         raise ValueError("Invalid upload file id format")
     stmt = select(UploadFile).where(
         UploadFile.id == upload_file_id,
-        UploadFile.tenant_id == tenant_id,
+        # UploadFile.tenant_id == tenant_id, # tenant会是app开发者的id，考虑到uploadfile id不太容易重复，直接用file id即可
     )
+    print("stmt:",stmt)
 
     row = db.session.scalar(stmt)
     if row is None:

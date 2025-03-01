@@ -21,8 +21,11 @@ def create_flask_app_with_configs() -> DifyApp:
 
 def create_app() -> DifyApp:
     start_time = time.perf_counter()
+    print("create_flask_app_with_configs")
     app = create_flask_app_with_configs()
+    print("initialize_extensions")
     initialize_extensions(app)
+    print("Finished initialize_extensions")
     end_time = time.perf_counter()
     if dify_config.DEBUG:
         logging.info(f"Finished create_app ({round((end_time - start_time) * 1000, 2)} ms)")
@@ -78,6 +81,7 @@ def initialize_extensions(app: DifyApp):
     for ext in extensions:
         short_name = ext.__name__.split(".")[-1]
         is_enabled = ext.is_enabled() if hasattr(ext, "is_enabled") else True
+        print("Extension %s which enabled %s is under init" %(short_name,str(is_enabled)))
         if not is_enabled:
             if dify_config.DEBUG:
                 logging.info(f"Skipped {short_name}")
@@ -88,6 +92,7 @@ def initialize_extensions(app: DifyApp):
         end_time = time.perf_counter()
         if dify_config.DEBUG:
             logging.info(f"Loaded {short_name} ({round((end_time - start_time) * 1000, 2)} ms)")
+        print("Extension %s which enabled %s is finished init" %(short_name,str(is_enabled)))
 
 
 def create_migrations_app():

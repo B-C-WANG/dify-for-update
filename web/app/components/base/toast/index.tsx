@@ -39,22 +39,23 @@ const Toast = ({
   customComponent,
 }: IToastProps) => {
   const { close } = useToastContext()
-  // sometimes message is react node array. Not handle it.
   if (typeof message !== 'string')
     return null
 
   return <div className={classNames(
     className,
-    'fixed w-[360px] rounded-xl my-4 mx-8 flex-grow z-[9999] overflow-hidden',
-    size === 'md' ? 'p-3' : 'p-2',
-    'border border-components-panel-border-subtle bg-components-panel-bg-blur shadow-sm',
-    'top-0',
-    'right-0',
+    'fixed w-[420px] rounded-2xl my-4 mx-8 flex-grow z-[9999]',
+    size === 'md' ? 'p-4' : 'p-3',
+    'border-[0.5px] border-black/5 bg-white/98 backdrop-blur-xl',
+    'top-[40%] left-1/2 transform -translate-x-1/2 -translate-y-1/2',
+    'shadow-2xl transition-all duration-300 ease-out',
+    'animate-[toast-in_0.3s_cubic-bezier(0.21, 1.02, 0.73, 1)]',
   )}>
-    <div className={`absolute inset-0 opacity-40 -z-10 ${(type === 'success' && 'bg-[linear-gradient(92deg,rgba(23,178,106,0.25)_0%,rgba(255,255,255,0.00)_100%)]')
-      || (type === 'warning' && 'bg-[linear-gradient(92deg,rgba(247,144,9,0.25)_0%,rgba(255,255,255,0.00)_100%)]')
-      || (type === 'error' && 'bg-[linear-gradient(92deg,rgba(240,68,56,0.25)_0%,rgba(255,255,255,0.00)_100%)]')
-      || (type === 'info' && 'bg-[linear-gradient(92deg,rgba(11,165,236,0.25)_0%,rgba(255,255,255,0.00)_100%)]')
+    <div className={`absolute inset-0 rounded-2xl opacity-35 -z-10 ${
+      (type === 'success' && 'bg-[radial-gradient(circle_at_center,rgba(23,178,106,0.4)_0%,rgba(255,255,255,0.00)_70%)]')
+      || (type === 'warning' && 'bg-[radial-gradient(circle_at_center,rgba(247,144,9,0.4)_0%,rgba(255,255,255,0.00)_70%)]')
+      || (type === 'error' && 'bg-[radial-gradient(circle_at_center,rgba(240,68,56,0.4)_0%,rgba(255,255,255,0.00)_70%)]')
+      || (type === 'info' && 'bg-[radial-gradient(circle_at_center,rgba(11,165,236,0.4)_0%,rgba(255,255,255,0.00)_70%)]')
     }`}
     />
     <div className={`flex ${size === 'md' ? 'gap-1' : 'gap-0.5'}`}>

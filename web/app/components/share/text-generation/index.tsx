@@ -37,7 +37,7 @@ import Toast from '@/app/components/base/toast'
 import type { VisionFile, VisionSettings } from '@/types/app'
 import { Resolution, TransferMethod } from '@/types/app'
 import { useAppFavicon } from '@/hooks/use-app-favicon'
-
+import config from '@/app/custom-content/config'
 const GROUP_SIZE = 5 // to avoid RPM(Request per minute) limit. The group task finished then the next group.
 enum TaskStatus {
   pending = 'pending',
@@ -416,7 +416,7 @@ const TextGeneration: FC<IMainProps> = ({
       if (canReplaceLogo)
         document.title = `${siteInfo.title}`
       else
-        document.title = `${siteInfo.title} - Powered by Dify`
+        document.title = `${siteInfo.title} - Powered by ${config.title}`
     }
   }, [siteInfo?.title, canReplaceLogo])
 
@@ -552,12 +552,14 @@ const TextGeneration: FC<IMainProps> = ({
         'bg-gray-50',
       )}>
         {/* Left */}
+        
         <div className={cn(
-          isPC ? 'w-[600px] max-w-[50%] p-8' : 'p-4',
+          isPC ? 'w-[600px] max-w-[50%] p-8 ' : 'p-4',
           isInstalledApp && 'rounded-l-2xl',
           'shrink-0 relative flex flex-col pb-10 h-full border-r border-gray-100 bg-white',
         )}>
-          <div className='mb-6'>
+          {/* 这里的mt-[70px]是给logo留白的部分 */}
+          <div className='mb-6 mt-[70px]'>
             <div className='flex items-center justify-between'>
               <div className='flex items-center space-x-3'>
                 <AppIcon

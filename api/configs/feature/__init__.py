@@ -115,7 +115,7 @@ class CodeExecutionSandboxConfig(BaseSettings):
 
     CODE_MAX_STRING_LENGTH: PositiveInt = Field(
         description="Maximum allowed length for strings in code execution",
-        default=80000,
+        default=80000000,
     )
 
     CODE_MAX_STRING_ARRAY_LENGTH: PositiveInt = Field(
@@ -315,8 +315,8 @@ class HttpConfig(BaseSettings):
     )
 
     RESPECT_XFORWARD_HEADERS_ENABLED: bool = Field(
-        description="Enable handling of X-Forwarded-For, X-Forwarded-Proto, and X-Forwarded-Port headers"
-        " when the app is behind a single trusted reverse proxy.",
+        description="Enable or disable the X-Forwarded-For Proxy Fix middleware from Werkzeug"
+        " to respect X-* headers to redirect clients",
         default=False,
     )
 

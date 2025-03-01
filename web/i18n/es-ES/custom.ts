@@ -1,3 +1,5 @@
+import config from '@/app/custom-content/config'
+
 const translation = {
   custom: 'Personalización',
   upgradeTip: {
@@ -6,7 +8,7 @@ const translation = {
   },
   webapp: {
     title: 'Personalizar marca de WebApp',
-    removeBrand: 'Eliminar Powered by Dify',
+    removeBrand: `Eliminar Powered by ${config.title}`,
     changeLogo: 'Cambiar Imagen de Marca Powered by',
     changeLogoTip: 'Formato SVG o PNG con un tamaño mínimo de 40x40px',
   },

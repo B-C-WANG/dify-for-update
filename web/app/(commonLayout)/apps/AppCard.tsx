@@ -10,7 +10,7 @@ import cn from '@/utils/classnames'
 import type { App } from '@/types/app'
 import Confirm from '@/app/components/base/confirm'
 import Toast, { ToastContext } from '@/app/components/base/toast'
-import { copyApp, deleteApp, exportAppConfig, updateAppInfo } from '@/service/apps'
+import { copyApp, deleteApp, exportAppConfig, updateAppInfo, updateAppSiteStatus } from '@/service/apps'
 import DuplicateAppModal from '@/app/components/app/duplicate-modal'
 import type { DuplicateAppModalProps } from '@/app/components/app/duplicate-modal'
 import AppIcon from '@/app/components/base/app-icon'
@@ -31,13 +31,46 @@ import DSLExportConfirmModal from '@/app/components/workflow/dsl-export-confirm-
 import { fetchWorkflowDraft } from '@/service/workflow'
 import { fetchInstalledAppList } from '@/service/explore'
 import { AppTypeIcon } from '@/app/components/app/type-selector'
+import PublishModal from '@/app/components/app/publish-modal'
 
 export type AppCardProps = {
   app: App
   onRefresh?: () => void
 }
 
+const getStatusDisplay = (status: string | null | undefined) => {
+  if (!status || status === 'normal') return {
+    text: '未发布',
+    className: 'bg-gray-100 text-gray-600'
+  }
+  
+  switch (status) {
+    case 'enable':
+      return {
+        text: '已发布',
+        className: 'bg-green-50 text-green-600'
+      }
+    case 'disable':
+      return {
+        text: '停用',
+        className: 'bg-red-50 text-red-600'
+      }
+    default:
+      return {
+        text: '未发布',
+        className: 'bg-gray-100 text-gray-600'
+      }
+  }
+}
+
 const AppCard = ({ app, onRefresh }: AppCardProps) => {
+  console.log('AppCard render - app data:', {
+    id: app.id,
+    name: app.name,
+    publish_path: app.publish_path,
+    publish_status: app.publish_status
+  })
+
   const { t } = useTranslation()
   const { notify } = useContext(ToastContext)
   const { isCurrentWorkspaceEditor } = useAppContext()
@@ -54,6 +87,7 @@ const AppCard = ({ app, onRefresh }: AppCardProps) => {
   const [showSwitchModal, setShowSwitchModal] = useState<boolean>(false)
   const [showConfirmDelete, setShowConfirmDelete] = useState(false)
   const [secretEnvList, setSecretEnvList] = useState<EnvironmentVariable[]>([])
+  const [showPublishModal, setShowPublishModal] = useState(false)
 
   const onConfirmDelete = useCallback(async () => {
     try {
@@ -224,6 +258,12 @@ const AppCard = ({ app, onRefresh }: AppCardProps) => {
         Toast.notify({ type: 'error', message: `${e.message || e}` })
       }
     }
+    const onClickEditPublish = async (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation()
+      props.onClick?.()
+      e.preventDefault()
+      setShowPublishModal(true)
+    }
     return (
       <div className="relative w-full py-1" onMouseLeave={onMouseLeave}>
         <button className={s.actionItem} onClick={onClickSettings}>
@@ -236,18 +276,23 @@ const AppCard = ({ app, onRefresh }: AppCardProps) => {
         <button className={s.actionItem} onClick={onClickExport}>
           <span className={s.actionName}>{t('app.export')}</span>
         </button>
+        <Divider className="!my-1" />
+        <button className={s.actionItem} onClick={onClickEditPublish}>
+          <span className={s.actionName}>编辑发布信息</span>
+        </button>
+        <Divider className="!my-1" />
         {(app.mode === 'completion' || app.mode === 'chat') && (
           <>
-            <Divider className="!my-1" />
             <div
               className='h-9 py-2 px-3 mx-1 flex items-center hover:bg-gray-50 rounded-lg cursor-pointer'
               onClick={onClickSwitch}
             >
               <span className='text-gray-700 text-sm leading-5'>{t('app.switch')}</span>
             </div>
+            <Divider className="!my-1" />
+
           </>
         )}
-        <Divider className="!my-1" />
         <button className={s.actionItem} onClick={onClickInstalledApp}>
           <span className={s.actionName}>{t('app.openInExplore')}</span>
         </button>
@@ -269,6 +314,51 @@ const AppCard = ({ app, onRefresh }: AppCardProps) => {
     setTags(app.tags)
   }, [app.tags])
 
+  const handlePublishConfirm = async (publishPath: string, publishStatus: string) => {
+    try {
+      await updateAppSiteStatus({
+        url: `/apps/${app.id}/publish`,
+        body: {
+          publish_path: publishPath,
+          publish_status: publishStatus,
+        },
+      })
+      notify({ type: 'success', message: '发布信息更新成功' })
+      await Promise.all([
+        mutateApps(),
+        onRefresh?.(),
+      ])
+      setShowPublishModal(false)
+    }
+    catch (e: any) {
+      notify({ type: 'error', message: '发布信息更新失败' })
+    }
+  }
+
+  const renderStatus = () => {
+    console.log('Rendering status:', app.publish_status)
+    const status = getStatusDisplay(app.publish_status)
+    return (
+      <span className={cn(
+        'ml-1 font-medium px-2 py-0.5 rounded-full text-xs',
+        status.className
+      )}>
+        {status.text}
+      </span>
+    )
+  }
+
+  const renderPath = () => {
+    return (
+      <span className={cn(
+        'ml-1 font-medium px-2 py-0.5 rounded-full text-xs',
+        'bg-gray-100 text-gray-600'
+      )}>
+        {app.publish_path || ''}
+      </span>
+    )
+  }
+
   return (
     <>
       <div
@@ -276,7 +366,7 @@ const AppCard = ({ app, onRefresh }: AppCardProps) => {
           e.preventDefault()
           getRedirection(isCurrentWorkspaceEditor, app, push)
         }}
-        className='relative h-[160px] group col-span-1 bg-components-card-bg border-[1px] border-solid border-components-card-border rounded-xl shadow-sm inline-flex flex-col transition-all duration-200 ease-in-out cursor-pointer hover:shadow-lg'
+        className='relative min-h-[160px] group col-span-1 bg-components-card-bg border-[1px] border-solid border-components-card-border rounded-xl shadow-sm inline-flex flex-col transition-all duration-200 ease-in-out cursor-pointer hover:shadow-lg'
       >
         <div className='flex pt-[14px] px-[14px] pb-3 h-[66px] items-center gap-3 grow-0 shrink-0'>
           <div className='relative shrink-0'>
@@ -301,6 +391,32 @@ const AppCard = ({ app, onRefresh }: AppCardProps) => {
               {app.mode === 'completion' && <div className='truncate'>{t('app.types.completion').toUpperCase()}</div>}
             </div>
           </div>
+          {isCurrentWorkspaceEditor && (
+            <div className='!flex shrink-0'>
+              <CustomPopover
+                htmlContent={<Operations />}
+                position="br"
+                trigger="click"
+                btnElement={
+                  <div className='flex items-center justify-center w-8 h-8 cursor-pointer rounded-md'>
+                    <RiMoreFill className='w-4 h-4 text-text-tertiary' />
+                  </div>
+                }
+                btnClassName={open =>
+                  cn(
+                    open ? '!bg-black/5 !shadow-none' : '!bg-transparent',
+                    'h-8 w-8 !p-2 rounded-md border-none hover:!bg-black/5',
+                  )
+                }
+                popupClassName={
+                  (app.mode === 'completion' || app.mode === 'chat')
+                    ? '!w-[256px] translate-x-[-224px]'
+                    : '!w-[160px] translate-x-[-128px]'
+                }
+                className={'h-fit !z-20'}
+              />
+            </div>
+          )}
         </div>
         <div className='title-wrapper h-[90px] px-[14px] text-xs leading-normal text-text-tertiary'>
           <div
@@ -310,7 +426,19 @@ const AppCard = ({ app, onRefresh }: AppCardProps) => {
             {app.description}
           </div>
         </div>
-        <div className={cn(
+        <div className="absolute bottom-3 left-[14px] right-[14px]">
+          <div className="text-xs space-y-1">
+            <div className="flex items-center">
+              <span className="text-gray-500">发布路径:</span>
+              {renderPath()}
+            </div>
+            <div className="flex items-center">
+              <span className="text-gray-500">发布状态:</span>
+              {renderStatus()}
+            </div>
+          </div>
+        </div>
+        {/* <div className={cn(
           'absolute bottom-1 left-0 right-0 items-center shrink-0 pt-1 pl-[14px] pr-[6px] pb-[6px] h-[42px]',
           tags.length ? 'flex' : '!hidden group-hover:!flex',
         )}>
@@ -364,7 +492,7 @@ const AppCard = ({ app, onRefresh }: AppCardProps) => {
               </div>
             </>
           )}
-        </div>
+          </div> */}
       </div>
       {showEditModal && (
         <EditAppModal
@@ -416,6 +544,15 @@ const AppCard = ({ app, onRefresh }: AppCardProps) => {
           envList={secretEnvList}
           onConfirm={onExport}
           onClose={() => setSecretEnvList([])}
+        />
+      )}
+      {showPublishModal && (
+        <PublishModal
+          show={showPublishModal}
+          onClose={() => setShowPublishModal(false)}
+          publishPath={app.publish_path || ''}
+          publishStatus={app.publish_status || 'disable'}
+          onConfirm={handlePublishConfirm}
         />
       )}
     </>

@@ -20,6 +20,7 @@ class Storage:
 
     @staticmethod
     def get_storage_factory(storage_type: str) -> Callable[[], BaseStorage]:
+        print("[Info] using storage type is", storage_type)
         match storage_type:
             case StorageType.S3:
                 from extensions.storage.aws_s3_storage import AwsS3Storage

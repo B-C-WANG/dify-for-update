@@ -33,11 +33,8 @@ RUN yarn build
 # production stage
 FROM base AS production
 
-ENV NODE_ENV=production
-ENV EDITION=SELF_HOSTED
-ENV DEPLOY_ENV=PRODUCTION
-ENV CONSOLE_API_URL=http://127.0.0.1:5001
-ENV APP_API_URL=http://127.0.0.1:5001
+
+
 ENV PORT=3000
 ENV NEXT_TELEMETRY_DISABLED=1
 
@@ -63,9 +60,10 @@ RUN yarn global add pm2 \
     && chown -R 1001:0 /.pm2 /app/web \
     && chmod -R g=u /.pm2 /app/web
 
+
 ARG COMMIT_SHA
 ENV COMMIT_SHA=${COMMIT_SHA}
-
+RUN ls -al
 USER 1001
 EXPOSE 3000
 ENTRYPOINT ["/bin/sh", "./entrypoint.sh"]

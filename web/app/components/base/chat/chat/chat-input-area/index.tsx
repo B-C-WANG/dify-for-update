@@ -41,6 +41,10 @@ type ChatInputAreaProps = {
   theme?: Theme | null
   isResponding?: boolean
 }
+
+// 添加动画样式类
+const pulsingAnimation = 'animate-pulse bg-primary-50 transition-colors duration-300'
+
 const ChatInputArea = ({
   showFeatureBar,
   showFileUpload,
@@ -79,6 +83,7 @@ const ChatInputArea = ({
   const historyRef = useRef([''])
   const [currentIndex, setCurrentIndex] = useState(-1)
   const handleSend = () => {
+    // 已经在响应了就不发送
     if (isResponding) {
       notify({ type: 'info', message: t('appDebug.errorMessage.waitForResponse') })
       return
@@ -95,7 +100,7 @@ const ChatInputArea = ({
         return
       }
       if (checkInputsForm(inputs, inputsForm)) {
-        onSend(query, files)
+        onSend(query, files) // 这里是调用后端的，在父组件的onSend
         setQuery('')
         setFiles([])
       }
@@ -155,6 +160,7 @@ const ChatInputArea = ({
         className={cn(
           'relative pb-[9px] bg-components-panel-bg-blur border border-components-chat-input-border rounded-xl shadow-md z-10',
           isDragActive && 'border border-dashed border-components-option-card-option-selected-border',
+          isResponding && pulsingAnimation
         )}
       >
         <div className='relative px-[9px] pt-[9px] max-h-[158px] overflow-x-hidden overflow-y-auto'>
@@ -193,6 +199,7 @@ const ChatInputArea = ({
               />
             </div>
             {
+              // 这里就是输入框的输入按钮
               !isMultipleLine && operation
             }
           </div>

@@ -46,6 +46,11 @@ class MessageService:
             app_model=app_model, user=user, conversation_id=conversation_id
         )
 
+        extra = {}
+        if not first_id:
+            # 当 first_id 为空时，获取 conversation 的 inputs
+            extra['conversation_inputs'] = conversation.inputs
+
         if first_id:
             first_message = (
                 db.session.query(Message)
@@ -95,7 +100,12 @@ class MessageService:
         if order == "asc":
             history_messages = list(reversed(history_messages))
 
-        return InfiniteScrollPagination(data=history_messages, limit=limit, has_more=has_more)
+        return InfiniteScrollPagination(
+            data=history_messages, 
+            limit=limit, 
+            has_more=has_more,
+            extra=extra
+        )
 
     @classmethod
     def pagination_by_last_id(

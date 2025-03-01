@@ -51,3 +51,49 @@ class WorkspaceService:
             }
 
         return tenant_info
+
+    @classmethod
+    def update_tenant_name(cls, tenant_id: str, new_name: str) -> Tenant:
+        """
+        Update tenant name
+        :param tenant_id: Tenant id
+        :param new_name: new tenant name
+        :return: updated Tenant object
+        """
+        # 添加参数验证
+        if not new_name or not new_name.strip():
+            raise ValueError("工作空间名称不能为空")
+        
+        new_name = new_name.strip()
+        if len(new_name) > 50:
+            raise ValueError("工作空间名称不能超过50个字符")
+
+        tenant = db.session.query(Tenant).filter(Tenant.id == tenant_id).first()
+        if not tenant:
+            raise ValueError("找不到指定的工作空间")
+
+        # 检查用户权限
+        print("checking...",tenant.id,current_user.id)
+        tenant_account_join = (
+            db.session.query(TenantAccountJoin)
+            .filter(
+                TenantAccountJoin.tenant_id == tenant.id,
+                TenantAccountJoin.account_id == current_user.id
+            )
+            .first()
+        )
+        
+        if not tenant_account_join:
+            raise ValueError("您不是该工作空间的成员")
+      
+        if tenant_account_join.role not in [TenantAccountJoinRole.OWNER.value, TenantAccountJoinRole.ADMIN.value]:
+            raise ValueError("您没有修改工作空间名称的权限")
+        
+        try:
+            tenant.name = new_name
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise ValueError(f"更新工作空间名称失败: {str(e)}")
+        
+        return tenant

@@ -39,3 +39,88 @@
 .spin-animation path:nth-child(4) {
     animation-delay: 2s;
 }
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  position: relative;
+}
+
+.loading-spinner-inner {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: #7C3AED;
+  border-right-color: #3B82F6;
+  animation: spin 1s linear infinite;
+}
+
+.loading-spinner-inner::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: #8B5CF6;
+  border-right-color: #60A5FA;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  background: linear-gradient(90deg, #3B82F6, #7C3AED, #8B5CF6, #60A5FA);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  animation: loading-text-gradient 4s ease infinite;
+  display: inline-block;
+  position: relative;
+}
+
+@keyframes loading-text-gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.loading-dots {
+  position: absolute;
+  left: 100%;
+  top: 0;
+  width: 24px;
+  height: 100%;
+  overflow: hidden;
+  animation: loading-dots 1.5s steps(4, jump-none) infinite;
+  background: linear-gradient(90deg, #3B82F6, #7C3AED, #8B5CF6, #60A5FA);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.loading-dots::before {
+  content: '...';
+  position: absolute;
+  left: 0;
+  line-height: 1;
+}
+
+@keyframes loading-dots {
+  0% { width: 0; }
+  25% { width: 8px; }
+  50% { width: 16px; }
+  75% { width: 24px; }
+  100% { width: 0; }
+}

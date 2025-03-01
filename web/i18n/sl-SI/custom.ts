@@ -1,3 +1,5 @@
+import config from '@/app/custom-content/config'
+
 const translation = {
   custom: 'Prilagoditev',
   upgradeTip: {
@@ -6,7 +8,7 @@ const translation = {
   },
   webapp: {
     title: 'Prilagodi blagovno znamko spletne aplikacije',
-    removeBrand: 'Odstrani Powered by Dify',
+    removeBrand: `Odstrani Powered by ${config.title}`,
     changeLogo: 'Spremeni sliko Powered by Brand',
     changeLogoTip: 'Format SVG ali PNG z minimalno velikostjo 40x40px',
   },

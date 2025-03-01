@@ -55,7 +55,7 @@ export default function InviteSettingsPage() {
         localStorage.setItem('console_token', res.data.access_token)
         localStorage.setItem('refresh_token', res.data.refresh_token)
         setLocaleOnClient(language, false)
-        router.replace('/apps')
+        router.replace('/explore/apps')
       }
     }
     catch {

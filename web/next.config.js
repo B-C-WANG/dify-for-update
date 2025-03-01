@@ -39,8 +39,8 @@ const nextConfig = {
     return [
       {
         source: '/',
-        destination: '/apps',
-        permanent: false,
+        destination: '/explore/apps', // 这个是调整访问根路径时，重定向到 explore/apps
+        permanent: true,
       },
     ]
   },

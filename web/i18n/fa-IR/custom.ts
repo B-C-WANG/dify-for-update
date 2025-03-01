@@ -1,3 +1,5 @@
+import config from '@/app/custom-content/config'
+
 const translation = {
   custom: 'سفارشی سازی',
   upgradeTip: {
@@ -6,7 +8,7 @@ const translation = {
   },
   webapp: {
     title: 'سفارشی سازی برند وب اپ',
-    removeBrand: 'حذف "Powered by Dify"',
+    removeBrand: `حذف "Powered by ${config.title}"`,
     changeLogo: 'تغییر تصویر برند "Powered by"',
     changeLogoTip: 'فرمت SVG یا PNG با حداقل اندازه 40x40px',
   },

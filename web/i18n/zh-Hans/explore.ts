@@ -38,6 +38,10 @@ const translation = {
     HR: '人力资源',
     Workflow: '工作流',
   },
+  nonDeveloper: {
+    title: '请打开左上角AI资源库选择你要使用的AI人力',
+    subtitle: '或者订阅其他开发者的工具 (即将推出)'
+  }
 }
 
 export default translation

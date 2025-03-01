@@ -27,6 +27,7 @@ import SecretKeyButton from '@/app/components/develop/secret-key/secret-key-butt
 import type { AppDetailResponse } from '@/models/app'
 import { useAppContext } from '@/context/app-context'
 import type { AppSSO } from '@/types/app'
+import PublishModal from '@/app/components/app/publish-modal'
 import Indicator from '@/app/components/header/indicator'
 
 export type IAppCardProps = {
@@ -38,6 +39,11 @@ export type IAppCardProps = {
   onChangeStatus: (val: boolean) => Promise<void>
   onSaveSiteConfig?: (params: ConfigParams) => Promise<void>
   onGenerateCode?: () => Promise<void>
+  onChangePublishStatus?: (publishPath?: string, publishStatus?: string) => Promise<void>
+}
+
+const EmbedIcon = ({ className = '' }: HTMLProps<HTMLDivElement>) => {
+  return <div className={`${style.codeBrowserIcon} ${className}`}></div>
 }
 
 function AppCard({
@@ -49,6 +55,7 @@ function AppCard({
   onSaveSiteConfig,
   onGenerateCode,
   className,
+  onChangePublishStatus,
 }: IAppCardProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -58,6 +65,7 @@ function AppCard({
   const [showCustomizeModal, setShowCustomizeModal] = useState(false)
   const [genLoading, setGenLoading] = useState(false)
   const [showConfirmDelete, setShowConfirmDelete] = useState(false)
+  const [showPublishModal, setShowPublishModal] = useState(false)
 
   const { t } = useTranslation()
 
@@ -125,6 +133,11 @@ function AppCard({
       await asyncRunSafe(onGenerateCode())
       setGenLoading(false)
     }
+  }
+
+  const handlePublishConfirm = async (publishPath: string, publishStatus: string) => {
+    await onChangePublishStatus?.(publishPath, publishStatus)
+    setShowPublishModal(false)
   }
 
   return (
@@ -237,6 +250,21 @@ function AppCard({
             )
           })}
         </div>
+        {appInfo.publish_path && (
+          <div className="mt-4">
+            <div className="text-sm font-medium text-gray-900">发布信息</div>
+            <div className="mt-2 text-sm text-gray-500">
+              <div>发布路径: {appInfo.publish_path}</div>
+              <div>发布状态: {appInfo.publish_status}</div>
+            </div>
+            <button
+              className="mt-2 text-sm text-primary-600 hover:text-primary-700"
+              onClick={() => setShowPublishModal(true)}
+            >
+              编辑发布信息
+            </button>
+          </div>
+        )}
       </div>
       {isApp
         ? (
@@ -266,6 +294,15 @@ function AppCard({
           </>
         )
         : null}
+      {showPublishModal && (
+        <PublishModal
+          show={showPublishModal}
+          onClose={() => setShowPublishModal(false)}
+          publishPath={appInfo.publish_path}
+          publishStatus={appInfo.publish_status}
+          onConfirm={handlePublishConfirm}
+        />
+      )}
     </div>
   )
 }

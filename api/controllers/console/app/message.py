@@ -47,6 +47,7 @@ class ChatMessageListApi(Resource):
     @account_initialization_required
     @marshal_with(message_infinite_scroll_pagination_fields)
     def get(self, app_model):
+        print("ChatMessageListApi called in controllers/console/app/message.py")
         parser = reqparse.RequestParser()
         parser.add_argument("conversation_id", required=True, type=uuid_value, location="args")
         parser.add_argument("first_id", type=uuid_value, location="args")

@@ -250,6 +250,24 @@ class AppService:
 
         return app
 
+    def update_publish_info(self, app: App, update_fields: str) -> App:
+        """
+        Update app name
+        :param app: App instance
+        :param name: new name
+        :return: App instance
+        """
+        if update_fields.get('publish_path', None) is not None:
+            app.publish_path = update_fields['publish_path']
+            
+        if update_fields.get('publish_status', None) is not None:
+            app.publish_status = update_fields['publish_status']
+        app.updated_by = current_user.id
+        app.updated_at = datetime.now(UTC).replace(tzinfo=None)
+        db.session.commit()
+
+        return app
+    
     def update_app_icon(self, app: App, icon: str, icon_background: str) -> App:
         """
         Update app icon

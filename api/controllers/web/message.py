@@ -88,6 +88,7 @@ class MessageListApi(WebApiResource):
         parser.add_argument("first_id", type=uuid_value, location="args")
         parser.add_argument("limit", type=int_range(1, 100), required=False, default=20, location="args")
         args = parser.parse_args()
+        print("Request Message List From Web API", args)
 
         try:
             return MessageService.pagination_by_first_id(

@@ -206,6 +206,7 @@ export type ChatMessagesResponse = {
   data: Array<ChatMessage>
   has_more: boolean
   limit: number
+  extra?: any
 }
 
 export const MessageRatings = ['like', 'dislike', null] as const

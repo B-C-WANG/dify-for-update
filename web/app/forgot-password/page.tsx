@@ -6,6 +6,7 @@ import Header from '../signin/_header'
 import style from '../signin/page.module.css'
 import ForgotPasswordForm from './ForgotPasswordForm'
 import ChangePasswordForm from '@/app/forgot-password/ChangePasswordForm'
+import config from '@/app/custom-content/config'
 
 const ForgotPassword = () => {
   const searchParams = useSearchParams()
@@ -28,7 +29,7 @@ const ForgotPassword = () => {
         <Header />
         {token ? <ChangePasswordForm /> : <ForgotPasswordForm />}
         <div className='px-8 py-6 text-sm font-normal text-gray-500'>
-          © {new Date().getFullYear()} LangGenius, Inc. All rights reserved.
+          {config.copyright.text}
         </div>
       </div>
     </div>

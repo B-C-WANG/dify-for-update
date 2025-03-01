@@ -47,9 +47,29 @@ function getFormattedChatList(messages: any[]) {
   const newChatList: ChatItem[] = []
   messages.forEach((item) => {
     const questionFiles = item.message_files?.filter((file: any) => file.belongs_to === 'user') || []
+    
+// CUSTOM 这里加上用户的inputs参数显示
+
+    // 处理 inputs 显示
+    let inputsContent = ''
+    if (item.inputs && Object.keys(item.inputs).length > 0) {
+      const inputEntries = Object.entries(item.inputs)
+      inputsContent = inputEntries.map(([key, value]) => {
+        if (value === null)
+          return `${key}: <空>`
+        if (Array.isArray(value) && value.length > 0 && value[0].filename) 
+          return `${key}: [${value.map((file: any) => file.filename).join(', ')}]`
+        return `${key}: ${value}`
+      }).join('\n')
+    }
+    
+    const content = (item.inputs && inputsContent) 
+      ? `${item.query}\n\n<div style="color: #666666; font-style: italic; border-left: 2px solid #666666; padding-left: 10px;">输入参数：<br/>${inputsContent.split('\n').join('<br/>')}</div>` 
+      : item.query
+    
     newChatList.push({
       id: `question-${item.id}`,
-      content: item.query,
+      content,
       isAnswer: false,
       message_files: getProcessedFilesFromResponse(questionFiles.map((item: any) => ({ ...item, related_id: item.id }))),
       parentMessageId: item.parent_message_id || undefined,

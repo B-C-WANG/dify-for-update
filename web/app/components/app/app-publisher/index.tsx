@@ -122,6 +122,17 @@ const AppPublisher = ({
 
   const [embeddingModalOpen, setEmbeddingModalOpen] = useState(false)
 
+  const roleDisplay = {
+    normal: {
+      text: t('common.role.normal'),
+      bgColor: 'bg-gray-100'
+    },
+    developer: {
+      text: t('common.role.developer'), 
+      bgColor: 'bg-blue-100'
+    }
+  }
+
   return (
     <PortalToFollowElem
       open={open}

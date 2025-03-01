@@ -31,6 +31,7 @@ export type UserProfileResponse = {
   last_active_at?: string
   last_login_ip?: string
   created_at?: string
+  role: 'normal' | 'developer'
 }
 
 export type UserProfileOriginResponse = {

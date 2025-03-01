@@ -13,7 +13,7 @@ import { getSystemFeatures, invitationCheck } from '@/service/common'
 import { LicenseStatus, defaultSystemFeatures } from '@/types/feature'
 import Toast from '@/app/components/base/toast'
 import { IS_CE_EDITION } from '@/config'
-
+import config from '@/app/custom-content/config'
 const NormalForm = () => {
   const { t } = useTranslation()
   const router = useRouter()
@@ -36,7 +36,7 @@ const NormalForm = () => {
       if (consoleToken && refreshToken) {
         localStorage.setItem('console_token', consoleToken)
         localStorage.setItem('refresh_token', refreshToken)
-        router.replace('/apps')
+        router.replace('/explore/apps')
         return
       }
 
@@ -135,8 +135,8 @@ const NormalForm = () => {
             <p className='mt-2 body-md-regular text-text-tertiary'>{t('login.joinTipStart')}{workspaceName}{t('login.joinTipEnd')}</p>
           </div>
           : <div className="w-full mx-auto">
-            <h2 className="title-4xl-semi-bold text-text-primary">{t('login.pageTitle')}</h2>
-            <p className='mt-2 body-md-regular text-text-tertiary'>{t('login.welcome')}</p>
+            <h2 className="title-4xl-semi-bold text-text-primary">{t('login.pageTitleNew','欢迎来到DalaxyAI')}</h2>
+            {/* <p className='mt-2 body-md-regular text-text-tertiary'>{t('login.welcome')}</p> */}
           </div>}
         <div className="bg-white">
           <div className="flex flex-col gap-3 mt-6">
@@ -190,13 +190,13 @@ const NormalForm = () => {
             <Link
               className='system-xs-medium text-text-secondary hover:underline'
               target='_blank' rel='noopener noreferrer'
-              href='https://dify.ai/terms'
+              href={config.legal.terms}
             >{t('login.tos')}</Link>
             &nbsp;&&nbsp;
             <Link
               className='system-xs-medium text-text-secondary hover:underline'
               target='_blank' rel='noopener noreferrer'
-              href='https://dify.ai/privacy'
+              href={config.legal.privacy}
             >{t('login.pp')}</Link>
           </div>
           {IS_CE_EDITION && <div className="w-hull block mt-2 system-xs-regular text-text-tertiary">

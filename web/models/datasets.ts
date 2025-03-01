@@ -140,10 +140,9 @@ export type FetchDatasetsParams = {
   url: string
   params: {
     page: number
-    ids?: string[]
     tag_ids?: string[]
-    limit?: number
-    include_all?: boolean
+    limit: number
+    include_all: boolean
     keyword?: string
   }
 }

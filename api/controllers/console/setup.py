@@ -15,6 +15,7 @@ from .wraps import only_edition_self_hosted
 
 class SetupApi(Resource):
     def get(self):
+        print("IF self hosted:",dify_config.EDITION)
         if dify_config.EDITION == "SELF_HOSTED":
             setup_status = get_setup_status()
             if setup_status:

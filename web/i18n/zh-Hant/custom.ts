@@ -1,3 +1,5 @@
+import config from '@/app/custom-content/config'
+
 const translation = {
   custom: '定製',
   upgradeTip: {
@@ -6,7 +8,7 @@ const translation = {
   },
   webapp: {
     title: '定製 WebApp 品牌',
-    removeBrand: '移除 Powered by Dify',
+    removeBrand: `移除 Powered by ${config.title}`,
     changeLogo: '更改 Powered by Brand 圖片',
     changeLogoTip: 'SVG 或 PNG 格式，最小尺寸為 40x40px',
   },

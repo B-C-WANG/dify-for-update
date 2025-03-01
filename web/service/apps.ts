@@ -70,6 +70,12 @@ export const updateAppSiteStatus: Fetcher<AppDetailResponse, { url: string; body
   return post<AppDetailResponse>(url, { body })
 }
 
+export const updateAppPublishStatus: Fetcher<AppDetailResponse, { url: string; body: Record<string, any> }> = ({ url, body }) => {
+  return post<AppDetailResponse>(url, { body })
+}
+
+
+
 export const updateAppApiStatus: Fetcher<AppDetailResponse, { url: string; body: Record<string, any> }> = ({ url, body }) => {
   return post<AppDetailResponse>(url, { body })
 }

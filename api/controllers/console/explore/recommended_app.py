@@ -41,6 +41,10 @@ class RecommendedAppListApi(Resource):
     @account_initialization_required
     @marshal_with(recommended_app_list_fields)
     def get(self):
+        # 对于非开发者，不提供探索结果
+        if current_user.role != "developer":
+            return {"recommended_apps": [], "categories": []}
+        
         # language args
         parser = reqparse.RequestParser()
         parser.add_argument("language", type=str, location="args")
@@ -52,6 +56,7 @@ class RecommendedAppListApi(Resource):
             language_prefix = current_user.interface_language
         else:
             language_prefix = languages[0]
+        
 
         return RecommendedAppService.get_recommended_apps_and_categories(language_prefix)
 

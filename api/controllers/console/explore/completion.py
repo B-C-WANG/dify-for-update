@@ -93,8 +93,11 @@ class CompletionStopApi(InstalledAppResource):
 
 class ChatApi(InstalledAppResource):
     def post(self, installed_app):
+        print("ChatApi called in controllers/console/explore/completion.py")
+        logging.info("ChatApi called in controllers/console/explore/completion.py")
         app_model = installed_app.app
         app_mode = AppMode.value_of(app_model.mode)
+        print("GotAppMode", app_mode)
         if app_mode not in {AppMode.CHAT, AppMode.AGENT_CHAT, AppMode.ADVANCED_CHAT}:
             raise NotChatAppError()
 

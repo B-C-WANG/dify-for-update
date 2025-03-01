@@ -50,6 +50,7 @@ type GroupItem = {
   description?: string
   icon: JSX.Element
   activeIcon: JSX.Element
+  developerOnly: boolean
 }
 
 export default function AccountSetting({
@@ -59,51 +60,66 @@ export default function AccountSetting({
   const [activeMenu, setActiveMenu] = useState(activeTab)
   const { t } = useTranslation()
   const { enableBilling, enableReplaceWebAppLogo } = useProviderContext()
-  const { isCurrentWorkspaceDatasetOperator } = useAppContext()
+  const { isCurrentWorkspaceDatasetOperator, userProfile } = useAppContext()
+  const isDeveloper = userProfile.role === 'developer'
 
   const workplaceGroupItems = (() => {
     if (isCurrentWorkspaceDatasetOperator)
       return []
-    return [
+
+    // 这里展示所有的选项，billing和custom可以开关
+    const allItems = [
       {
         key: 'provider',
         name: t('common.settings.provider'),
         icon: <RiBox3Line className={iconClassName} />,
         activeIcon: <RiBox3Fill className={iconClassName} />,
+        developerOnly: true,
       },
       {
         key: 'members',
         name: t('common.settings.members'),
         icon: <RiGroup2Line className={iconClassName} />,
         activeIcon: <RiGroup2Fill className={iconClassName} />,
+        developerOnly: false,
       },
       {
-        // Use key false to hide this item
-        key: enableBilling ? 'billing' : false,
+        // key: enableBilling ? 'billing' : false,
+        key: 'billing', // todo，这个billing不是实际的积分啥的，需要换一换
         name: t('common.settings.billing'),
         description: t('billing.plansCommon.receiptInfo'),
         icon: <RiMoneyDollarCircleLine className={iconClassName} />,
         activeIcon: <RiMoneyDollarCircleFill className={iconClassName} />,
+        developerOnly: false,
       },
       {
         key: 'data-source',
         name: t('common.settings.dataSource'),
         icon: <RiDatabase2Line className={iconClassName} />,
         activeIcon: <RiDatabase2Fill className={iconClassName} />,
+        developerOnly: true,
       },
       {
         key: 'api-based-extension',
         name: t('common.settings.apiBasedExtension'),
         icon: <RiPuzzle2Line className={iconClassName} />,
         activeIcon: <RiPuzzle2Fill className={iconClassName} />,
+        developerOnly: true,
       },
       {
-        key: (enableReplaceWebAppLogo || enableBilling) ? 'custom' : false,
+        // key: (enableReplaceWebAppLogo || enableBilling) ? 'custom' : false,
+        // key: 'custom',
+        key: false, // 这个不需要，已经设置了
         name: t('custom.custom'),
         icon: <RiColorFilterLine className={iconClassName} />,
         activeIcon: <RiColorFilterFill className={iconClassName} />,
+        developerOnly: true,
       },
-    ].filter(item => !!item.key) as GroupItem[]
+    ]
+
+    return allItems.filter(item => (
+      !!item.key && (isDeveloper || !item.developerOnly)
+    )) as GroupItem[]
   })()
 
   const media = useBreakpoints()
@@ -124,6 +140,7 @@ export default function AccountSetting({
           name: t('common.settings.language'),
           icon: <RiTranslate2 className={iconClassName} />,
           activeIcon: <RiTranslate2 className={iconClassName} />,
+          developerOnly: false,
         },
       ],
     },

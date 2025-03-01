@@ -2,6 +2,7 @@ import Header from './_header'
 import style from './page.module.css'
 
 import cn from '@/utils/classnames'
+import config from '@/app/custom-content/config'
 
 export default async function SignInLayout({ children }: any) {
   return <>
@@ -31,8 +32,7 @@ export default async function SignInLayout({ children }: any) {
           </div>
         </div>
         <div className='px-8 py-6 system-xs-regular text-text-tertiary'>
-          © {new Date().getFullYear()} LangGenius, Inc. All rights reserved.
-        </div>
+        {config.copyright.text}        </div>
       </div>
     </div>
   </>
