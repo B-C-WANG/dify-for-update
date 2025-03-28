@@ -17,7 +17,7 @@ class ProviderType(Enum):
         for member in ProviderType:
             if member.value == value:
                 return member
-        raise ValueError(f"No matching enum found for value '{value}'")
+        raise ValueError(f"No matching enum ProviderType found for value '{value}'")
 
 
 class ProviderQuotaType(Enum):
@@ -35,7 +35,7 @@ class ProviderQuotaType(Enum):
         for member in ProviderQuotaType:
             if member.value == value:
                 return member
-        raise ValueError(f"No matching enum found for value '{value}'")
+        raise ValueError(f"No matching enum ProviderQuotaType found for value '{value}'")
 
 
 class Provider(Base):

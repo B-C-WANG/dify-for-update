@@ -269,3 +269,107 @@ def process_image_tuple(image_tuple):
     
     image = Image.open(io.BytesIO(binary_data))
     return image 
+
+
+def image2url(request_like: Any) -> dict:
+    """
+    直接上传图片文件到S3存储并返回预签名URL，有效期为1天
+    
+    参数:
+    request_like: 类似request的对象，需要实现以下方法：
+        - files.get('file') 或 get_file('file')：获取图片文件
+        
+    支持的输入格式：
+    1. Flask Request 对象
+    2. DictRequest 对象 (用于内部调用)
+    3. 任何实现了类似接口的对象
+    
+    返回:
+    dict: 包含S3中图片的预签名URL，有效期为1天
+    """
+    error_info = ""
+    try:
+        # 统一获取文件接口
+        if hasattr(request_like, 'files'):
+            image_file = request_like.files.get('file')
+        else:
+            image_file = request_like.get_file('file')
+            
+        # 验证必需参数
+        if not image_file:
+            raise ValueError("缺少图片文件")
+            
+        # 处理图片输入
+        if isinstance(image_file, Image.Image):
+            image = image_file
+        elif hasattr(image_file, 'read'):
+            image = Image.open(image_file)
+        elif isinstance(image_file, tuple):
+            image = process_image_tuple(image_file)
+        else:
+            error_info += traceback.format_exc()
+            return {
+                "error_info": error_info,
+            }
+        image_width, image_height = image.size
+        
+        # 将图片转换为二进制数据
+        buffered = io.BytesIO()
+        if image.mode == 'RGBA':
+            image = image.convert('RGB')
+        image.save(buffered, format="JPEG")
+        buffered.seek(0)
+        
+        # 生成唯一的文件名
+        from datetime import datetime, timedelta
+        import uuid
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        unique_id = str(uuid.uuid4())[:8]
+        filename = f"original_images/{timestamp}_{unique_id}.jpg"
+        
+        # 获取storage实例并保存文件
+        from extensions.ext_storage import storage
+        storage.save(filename, buffered.getvalue())
+        
+        # 生成预签名URL
+        import boto3
+        from botocore.config import Config
+        
+        s3_client = boto3.client(
+            's3',
+            region_name=dify_config.S3_REGION,
+            endpoint_url=dify_config.S3_ENDPOINT,
+            aws_access_key_id=dify_config.S3_ACCESS_KEY,
+            aws_secret_access_key=dify_config.S3_SECRET_KEY,
+            config=Config(signature_version='s3v4')
+        )
+        
+        # 生成预签名URL，有效期为1天
+        expiration = 86400 * 6  # 1天 = 24小时 * 60分钟 * 60秒
+        bucket = dify_config.S3_BUCKET_NAME
+        
+        # 这里需要确认S3存储路径是否有"chat-bot-dalaxyai/"前缀
+        s3_key = f"{filename}"
+        
+        presigned_url = s3_client.generate_presigned_url(
+            'get_object',
+            Params={
+                'Bucket': bucket,
+                'Key': s3_key
+            },
+            ExpiresIn=expiration
+        )
+        
+        return {
+            "image_url": presigned_url,
+            "filename": filename,
+            "image_width": image_width,
+            "image_height": image_height,
+            "expires_in": "1 day"
+        }
+        
+    except Exception as e:
+        error_info += traceback.format_exc()
+        return {
+            "error_info": error_info,
+        }

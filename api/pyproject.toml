@@ -88,6 +88,8 @@ yarl = "~1.18.3"
 # Related transparent dependencies with pinned version
 # required by main implementations
 ############################################################
+weasyprint = "^65.0"
+playwright = "^1.51.0"
 [tool.poetry.group.indirect.dependencies]
 kaleido = "0.2.1"
 rank-bm25 = "~0.2.2"

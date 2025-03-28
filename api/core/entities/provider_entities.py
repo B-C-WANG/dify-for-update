@@ -28,7 +28,7 @@ class ProviderQuotaType(Enum):
         for member in ProviderQuotaType:
             if member.value == value:
                 return member
-        raise ValueError(f"No matching enum found for value '{value}'")
+        raise ValueError(f"No matching enum ProviderQuotaType found for value '{value}'")
 
 
 class QuotaUnit(Enum):

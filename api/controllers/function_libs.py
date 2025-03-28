@@ -1,4 +1,5 @@
-from .workflow_nodes_api.image_tools import add_text_to_image
+from .workflow_nodes_api.image_tools import add_text_to_image, image2url
+from .workflow_nodes_api.html2image import html2image
 class DictRequest:
     """模拟 Flask request 对象的简单实现"""
     def __init__(self, files: dict = None, form: dict = None):
@@ -11,5 +12,7 @@ class DictRequest:
     def get_form(self, key, default=None):
         return self.form.get(key, default)
 FUNCTION_LIBS = {
-    "add_text_to_image": add_text_to_image
+    "add_text_to_image": add_text_to_image,
+    "html2image":html2image,
+    "image2url":image2url
 }

@@ -13,7 +13,7 @@ class FileType(StrEnum):
         for member in FileType:
             if member.value == value:
                 return member
-        raise ValueError(f"No matching enum found for value '{value}'")
+        raise ValueError(f"No matching enum FileType found for value '{value}'")
 
 
 class FileTransferMethod(StrEnum):
@@ -26,7 +26,7 @@ class FileTransferMethod(StrEnum):
         for member in FileTransferMethod:
             if member.value == value:
                 return member
-        raise ValueError(f"No matching enum found for value '{value}'")
+        raise ValueError(f"No matching enum FileTransferMethod found for value '{value}'")
 
 
 class FileBelongsTo(StrEnum):
@@ -38,7 +38,7 @@ class FileBelongsTo(StrEnum):
         for member in FileBelongsTo:
             if member.value == value:
                 return member
-        raise ValueError(f"No matching enum found for value '{value}'")
+        raise ValueError(f"No matching enum FileBelongsTo found for value '{value}'")
 
 
 class FileAttribute(StrEnum):

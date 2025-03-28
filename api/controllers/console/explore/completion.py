@@ -1,5 +1,7 @@
 import logging
 from datetime import UTC, datetime
+import threading
+from typing import Dict, Any
 
 from flask_login import current_user  # type: ignore
 from flask_restful import reqparse  # type: ignore
@@ -108,18 +110,50 @@ class ChatApi(InstalledAppResource):
         parser.add_argument("conversation_id", type=uuid_value, location="json")
         parser.add_argument("parent_message_id", type=uuid_value, required=False, location="json")
         parser.add_argument("retriever_from", type=str, required=False, default="explore_app", location="json")
+        parser.add_argument("background_task", type=bool, required=False, default=False, location="json")
         args = parser.parse_args()
 
         args["auto_generate_name"] = False
 
         installed_app.last_used_at = datetime.now(UTC).replace(tzinfo=None)
         db.session.commit()
+        
+        # 如果请求为后台任务执行
+        if args["background_task"]:
+            task_id = str(uuid_value())
+            
+            # 创建后台线程执行生成任务
+            def background_generate():
+                try:
+                    AppGenerateService.generate(
+                        app_model=app_model, 
+                        user=current_user, 
+                        args=args, 
+                        invoke_from=InvokeFrom.EXPLORE, 
+                        streaming=False
+                    )
+                    logging.info(f"Background task {task_id} completed successfully")
+                except Exception as e:
+                    logging.exception(f"Background task {task_id} failed: {str(e)}")
+            
+            # 启动后台线程
+            thread = threading.Thread(target=background_generate)
+            thread.daemon = True
+            thread.start()
+            
+            # 立即返回成功响应
+            return {
+                "result": "success", 
+                "task_id": task_id, 
+                "message": "后台任务已提交，正在处理中"
+            }, 200
 
+        # 正常同步处理流程
         try:
             response = AppGenerateService.generate(
                 app_model=app_model, user=current_user, args=args, invoke_from=InvokeFrom.EXPLORE, streaming=True
             )
-
+            print("ChatApi  AppGenerateService.generate")
             return helper.compact_generate_response(response)
         except services.errors.conversation.ConversationNotExistsError:
             raise NotFound("Conversation Not Exists.")
@@ -141,7 +175,7 @@ class ChatApi(InstalledAppResource):
         except Exception as e:
             logging.exception("internal server error.")
             raise InternalServerError()
-
+        print("ChatApi post end")
 
 class ChatStopApi(InstalledAppResource):
     def post(self, installed_app, task_id):

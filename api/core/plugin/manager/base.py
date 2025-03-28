@@ -1,6 +1,7 @@
 import inspect
 import json
 import logging
+import traceback
 from collections.abc import Callable, Generator
 from typing import TypeVar
 
@@ -52,6 +53,7 @@ class BasePluginManager:
         Make a request to the plugin daemon inner API.
         """
         url = URL(str(plugin_daemon_inner_api_baseurl)) / path
+        print(f"request to {url}")
         headers = headers or {}
         headers["X-Api-Key"] = plugin_daemon_inner_api_key
         headers["Accept-Encoding"] = "gzip, deflate, br"
@@ -65,6 +67,7 @@ class BasePluginManager:
             )
         except requests.exceptions.ConnectionError:
             logger.exception("Request to Plugin Daemon Service failed")
+            traceback.print_exc()
             raise PluginDaemonInnerError(code=-500, message="Request to Plugin Daemon Service failed")
 
         return response
@@ -178,7 +181,7 @@ class BasePluginManager:
                     raise ValueError(line_data["error"])
                 else:
                     raise ValueError(line)
-
+            # print(f"rep: {rep}")
             if rep.code != 0:
                 if rep.code == -500:
                     try:

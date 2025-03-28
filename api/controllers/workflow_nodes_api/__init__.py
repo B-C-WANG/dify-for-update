@@ -5,6 +5,7 @@ from PIL import Image, ImageDraw, ImageFont
 import io
 import base64
 from .image_tools import add_text_to_image
+from .html2image import html2image
 
 bp = Blueprint("workflow_nodes_api", __name__, url_prefix="/workflow-nodes")
 api = ExternalApi(bp)
@@ -50,8 +51,15 @@ class ImageTextApi(Resource):
         except Exception as e:
             return {"error": f"服务器错误: {str(e)}"}, 500
 
+class Html2ImageApi(Resource):
+    def post(self):
+        try:
+            return html2image(request)
+        except ValueError as e:
+            return {"error": str(e)}, 400
+
 # 注册API资源
 api.add_resource(CodeExecutionApi, "/execute-code")
 api.add_resource(ImageTextApi, "/image-add-text")
-
+api.add_resource(Html2ImageApi, "/html2image")
 # 在这里增加图像处理的接口，用于图片粘贴文字

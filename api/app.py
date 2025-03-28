@@ -36,8 +36,8 @@ try:
     # create app
     if is_db_command():
         from app_factory import create_migrations_app
-
         app = create_migrations_app()
+        
     else:
         # It seems that JetBrains Python debugger does not work well with gevent,
         # so we need to disable gevent in debug mode.
@@ -58,7 +58,7 @@ try:
             psycogreen.gevent.patch_psycopg()
         print("Creating App")
         from app_factory import create_app
-
+        
         app = create_app()
         print("APP FINISHED ALL EXTENSION INIT")
         celery = app.extensions["celery"]
