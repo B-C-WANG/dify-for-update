@@ -3,6 +3,8 @@ import config from '@/app/custom-content/config'
 const translation = {
   custom: '定制',
   upgradeTip: {
+    title: '升级您的计划',
+    des: '升级您的计划来定制您的品牌。',
     prefix: '升级您的计划以',
     suffix: '定制您的品牌。',
   },

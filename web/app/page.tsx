@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 const Home = async () => {
   return (
-    <div className="flex flex-col justify-center min-h-screen py-12 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen flex-col justify-center py-12 sm:px-6 lg:px-8">
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <Loading type='area' />

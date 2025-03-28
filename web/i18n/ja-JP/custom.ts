@@ -3,6 +3,8 @@ import config from '@/app/custom-content/config'
 const translation = {
   custom: 'カスタマイズ',
   upgradeTip: {
+    title: 'プランをアップグレード',
+    des: 'ブランドをカスタマイズするためにはプランをアップグレードしてください。',
     prefix: 'プランをアップグレードして',
     suffix: 'ブランドをカスタマイズしましょう。',
   },

@@ -103,9 +103,9 @@ export default function MailAndPasswordAuth({ isInvite, isEmailSetup, allowRegis
     }
   }
 
-  return <form className="w-full max-w-md mx-auto p-6 space-y-6" onSubmit={() => { }}>
-    <div className='space-y-2'>
-      <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+  return <form onSubmit={() => { }}>
+    <div className='mb-3'>
+      <label htmlFor="email" className="system-md-semibold my-2 text-text-secondary">
         {t('login.email')}
       </label>
       <div className="mt-1 relative rounded-md shadow-sm">
@@ -130,9 +130,7 @@ export default function MailAndPasswordAuth({ isInvite, isEmailSetup, allowRegis
         </label>
         <Link
           href={`/reset-password?${searchParams.toString()}`}
-          className={`text-sm ${isEmailSetup 
-            ? 'text-primary-600 hover:text-primary-700 transition-colors duration-200' 
-            : 'text-gray-400 pointer-events-none'}`}
+          className={`system-xs-regular ${isEmailSetup ? 'text-components-button-secondary-accent-text' : 'pointer-events-none text-components-button-secondary-accent-text-disabled'}`}
           tabIndex={isEmailSetup ? 0 : -1}
           aria-disabled={!isEmailSetup}
         >

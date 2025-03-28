@@ -3,7 +3,6 @@ import React, { useRef } from 'react'
 
 import { useRouter } from 'next/navigation'
 import { useHover } from 'ahooks'
-import s from './style.module.css'
 import cn from '@/utils/classnames'
 import ItemOperation from '@/app/components/explore/item-operation'
 import AppIcon from '@/app/components/base/app-icon'
@@ -63,7 +62,7 @@ export default function AppNavItem({
       {isMobile && <AppIcon size='tiny' iconType={icon_type} icon={icon} background={icon_background} imageUrl={icon_url} />}
       {!isMobile && (
         <>
-          <div className='flex items-center space-x-2 w-0 grow'>
+          <div className='flex w-0 grow items-center space-x-2'>
             <AppIcon size='tiny' iconType={icon_type} icon={icon} background={icon_background} imageUrl={icon_url} />
             <div className={cn('overflow-hidden text-ellipsis whitespace-nowrap', s.itemContent)} title={name}>
               <div className="flex-1 flex items-center justify-between min-w-0 pr-2">
@@ -78,7 +77,7 @@ export default function AppNavItem({
               </div>
             </div>
           </div>
-          <div className='shrink-0 h-6' onClick={e => e.stopPropagation()}>
+          <div className='h-6 shrink-0' onClick={e => e.stopPropagation()}>
             <ItemOperation
               isPinned={isPinned}
               isItemHovering={isHovering}

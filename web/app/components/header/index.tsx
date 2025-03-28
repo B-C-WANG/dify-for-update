@@ -20,8 +20,8 @@ import { useProviderContext } from '@/context/provider-context'
 import { useModalContext } from '@/context/modal-context'
 import { LicenseStatus } from '@/types/feature'
 import { isDeveloper } from '@/app/components/common/DeveloperGuard'
-import LicenseNav from './license-env'
 import PlanBadge from './plan-badge'
+import LicenseNav from './license-env'
 import { Plan } from '../billing/type'
 
 const navClassName = `
@@ -56,10 +56,10 @@ const Header = () => {
     return null; // 普通用户不需要header
   }
   return (
-    <div className='flex flex-1 items-center justify-between px-4 bg-background-body'>
+    <div className='flex flex-1 items-center justify-between bg-background-body px-4'>
       <div className='flex items-center'>
         {isMobile && <div
-          className='flex items-center justify-center h-8 w-8 cursor-pointer'
+          className='flex h-8 w-8 cursor-pointer items-center justify-center'
           onClick={toggle}
         >
           <Bars3Icon className="h-4 w-4 text-gray-500" />
@@ -121,7 +121,7 @@ const Header = () => {
       </div>
       {
         (isMobile && isShowNavMenu) && (
-          <div className='w-full flex flex-col p-2 gap-y-1'>
+          <div className='flex w-full flex-col gap-y-1 p-2'>
             {!isCurrentWorkspaceDatasetOperator && <ExploreNav className={navClassName} />}
             {!isCurrentWorkspaceDatasetOperator && <AppNav />}
             {(isCurrentWorkspaceEditor || isCurrentWorkspaceDatasetOperator) && <DatasetNav />}
